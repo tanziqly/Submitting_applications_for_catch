@@ -10,6 +10,7 @@ export const ROUTES = {
   NOT_FOUND: "/404",
   SERVER_ERROR: "/500",
   DASHBOARD: "/dashboard",
+  ORDER_LOG: "/order-log",
 } as const;
 
 export const API_ENDPOINTS = {
@@ -19,5 +20,6 @@ export const API_ENDPOINTS = {
     DASHBOARD: "/dashboard",
     SIGN_OUT: "/auth/sign-out/",
     REFRESH: "/auth/refresh/",
+    ORDER_LOG: "/order-log",
   },
 } as const;

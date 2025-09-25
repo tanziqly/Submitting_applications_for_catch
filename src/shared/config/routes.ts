@@ -6,4 +6,5 @@ export const ROUTE_CONSTANTS = {
   NOTFOUND: "/*",
   SERVERERROR: "/505",
   DASHBOARD: "/dashboard",
+  ORDER_LOG: "/order-log",
 };

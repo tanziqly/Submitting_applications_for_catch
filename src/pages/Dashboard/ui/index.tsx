@@ -1,13 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@shared/ui/card";
-import { Button } from "@shared/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@shared/ui/table";
 import {
   LineChart,
   Line,
@@ -17,6 +8,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { ApplicationsTable } from "@shared/ui/orders";
+import { Link } from "react-router-dom";
+import { ClipboardPlus } from "lucide-react";
 
 // --- FSD структура ---
 // src/pages/dashboard/ui/DashboardPage.tsx
@@ -28,19 +22,6 @@ const stats = [
   { label: "Новые заявки", value: 17 },
   { label: "В работе", value: 27 },
   { label: "Завершено", value: 10 },
-];
-
-const chartData = [
-  { name: 0, value: 750 },
-  { name: 1, value: 720 },
-  { name: 2, value: 680 },
-  { name: 3, value: 760 },
-  { name: 4, value: 740 },
-  { name: 5, value: 580 },
-  { name: 6, value: 820 },
-  { name: 7, value: 760 },
-  { name: 8, value: 780 },
-  { name: 9, value: 400 },
 ];
 
 const tableData = [
@@ -76,27 +57,44 @@ const tableData = [
   },
 ];
 
+const chartData = [
+  { name: 0, value: 750 },
+  { name: 1, value: 720 },
+  { name: 2, value: 680 },
+  { name: 3, value: 760 },
+  { name: 4, value: 740 },
+  { name: 5, value: 580 },
+  { name: 6, value: 820 },
+  { name: 7, value: 760 },
+  { name: 8, value: 780 },
+  { name: 9, value: 400 },
+];
+
 export const DashboardPage = () => {
   return (
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
       {/* Сайдбар */}
-      <aside className="w-60 rounded-xl border border-gray-200 h-fit mr-4 p-4 space-y-2">
-        <nav className="flex flex-col gap-2 text-base">
-          <button className="w-full text-left rounded-md text-base px-4 py-2 bg-blue-100 font-medium hover:bg-blue-200 transition">
-            Главная
-          </button>
-          <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
-            Журнал заявок
-          </button>
-          <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
-            Профиль
-          </button>
-          <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
-            Выйти
-          </button>
-        </nav>
-      </aside>
-
+      <div>
+        <div className="text-xl mt-4 font-medium flex items-center gap-2 mb-4">
+          <ClipboardPlus /> Главная
+        </div>
+        <aside className="w-60 rounded-xl border border-gray-200 h-fit mr-4 p-4 space-y-2">
+          <nav className="flex flex-col gap-2 text-base">
+            <button className="w-full text-left rounded-md text-base px-4 py-2 bg-blue-100 font-medium hover:bg-blue-200 transition">
+              Главная
+            </button>
+            <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
+              <Link to="/order-log">Журнал заявок</Link>
+            </button>
+            <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
+              Профиль
+            </button>
+            <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
+              Выйти
+            </button>
+          </nav>
+        </aside>
+      </div>
       {/* Контент */}
       <main className="flex-1 border-l border-gray-200 p-6 space-y-6">
         {/* Статистика */}
@@ -135,40 +133,12 @@ export const DashboardPage = () => {
         </Card>
 
         {/* Таблица */}
-        <Card className="border-none shadow-none">
-          <CardHeader>
-            <CardTitle>Последние заявки</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-[#CADDFF]">
-                  <TableHead className="text-center text-[#6C6C6E] rounded-l-xl">
-                    Номер заявки
-                  </TableHead>
-                  <TableHead className="text-[#6C6C6E]">Заявитель</TableHead>
-                  <TableHead className="text-[#6C6C6E]">Срочность</TableHead>
-                  <TableHead className="text-[#6C6C6E] rounded-r-xl">
-                    Дата подачи
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tableData.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="text-center">{row.id}</TableCell>
-                    <TableCell>{row.applicant}</TableCell>
-                    <TableCell>{row.urgency}</TableCell>
-                    <TableCell>{row.date}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="text-center text-gray-500 py-2 cursor-pointer hover:underline">
-              Показать больше...
-            </div>
-          </CardContent>
-        </Card>
+        <ApplicationsTable
+          title="Последние заявки"
+          data={tableData}
+          showMoreButton={true}
+          maxVisibleRows={5}
+        />
       </main>
     </div>
   );
