@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   AUTH: {
     SIGN_IN: "/auth/sign-in/",
     SIGN_UP: "/auth/sign-up/",
+    PROFILE: "/profile",
     DASHBOARD: "/dashboard",
     SIGN_OUT: "/auth/sign-out/",
     REFRESH: "/auth/refresh/",

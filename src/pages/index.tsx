@@ -17,6 +17,7 @@ import { ServerError } from "@pages/ServerError";
 import { Layout } from "@widgets/Layout";
 import { DashboardPage } from "./Dashboard/ui";
 import { OrderLog } from "./OrderLog";
+import { Profile } from "./Profile";
 
 // const ProtectedRoute: FC<{ children: ReactNode }> = observer(({ children }) => {
 //   const location = useLocation();
@@ -55,6 +56,7 @@ export const Router: FC = () => {
           <Route path={ROUTE_CONSTANTS.SERVERERROR} element={<ServerError />} />
           <Route path={ROUTE_CONSTANTS.DASHBOARD} element={<DashboardPage />} />
           <Route path={ROUTE_CONSTANTS.ORDER_LOG} element={<OrderLog />} />
+          <Route path={ROUTE_CONSTANTS.PROFILE} element={<Profile />} />
           // {/* Редирект для несуществующих путей */}
           <Route
             path="*"
