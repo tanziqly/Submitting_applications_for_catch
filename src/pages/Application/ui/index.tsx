@@ -4,6 +4,7 @@ import { ClipboardPlus, MapPin, RectangleEllipsis, UserRound, FileUser, Contact,
 import { Select } from "@shared/ui/dropdown";
 import { Label } from "@shared/ui/label";
 import { useState } from "react";
+import { api } from "@shared/api/axios";
 
 const applicantOptions = [
     { label: "Глава администрации Введенского сельсовета", value: "0a12fc83-2199-4bae-88cf-752c923ecf07" },
@@ -73,6 +74,11 @@ interface ApplicationData {
 }
 
 export const Application = () => {
+
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
   const [formData, setFormData] = useState<ApplicationData>({
     address: "",
     applicant: {
@@ -112,35 +118,62 @@ export const Application = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Формируем финальный JSON
-    const submissionData = {
-      address: formData.address,
-      applicant: {
-        id: formData.applicant.id
-      },
-      behavior: formData.behavior,
-      contact_person: formData.contact_person,
-      dogs_count: Number(formData.dogs_count),
-      created_at: new Date().toISOString(),
-      number: `APP-${Date.now()}`,
-      source: {
-        id: "web"
-      },
-      status: "new",
-      urgency: formData.urgency
-    };
+  const handleSubmit = async () => {
 
-    console.log("Собранные данные:", JSON.stringify(submissionData, null, 2));
-    
-    // Здесь будет отправка на API
-    // await fetch('/api/applications', { 
-    //   method: 'POST', 
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(submissionData) 
-    // });
-    
-    alert("Данные собраны! Проверьте консоль браузера.");
+    setLoading(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    try {
+      // Формируем финальный JSON (убираем поля, которые сервер генерирует сам)
+      const submissionData = {
+        address: formData.address,
+        applicant: {
+          id: formData.applicant.id
+        },
+        behavior: formData.behavior,
+        contact_person: formData.contact_person,
+        dogs_count: Number(formData.dogs_count),
+        urgency: formData.urgency,
+        ...(formData.source && { applicant_info: formData.source })
+      };
+
+      console.log("Отправка данных на /requests:", submissionData);
+
+      // Отправка на API через ваш axios instance
+      const response = await api.post('/requests', submissionData);
+
+      console.log("Успешный ответ от сервера:", response.data);
+      
+      setSubmitSuccess(true);
+      handleClear();
+      
+      // Автоматически скрываем сообщение об успехе через 5 секунд
+      setTimeout(() => setSubmitSuccess(false), 5000);
+
+    } catch (error: any) {
+      console.error("Ошибка при отправке заявки:", error);
+      
+      // Обработка ошибок через ваш interceptor
+      if (error.response?.data) {
+        // Пытаемся получить сообщение об ошибке от сервера
+        const serverError = error.response.data;
+        
+        if (typeof serverError === 'object') {
+          // Если ошибка в формате { field: ["error message"] }
+          const errorMessages = Object.values(serverError).flat();
+          setSubmitError(errorMessages.join(', ') || "Ошибка при отправке заявки");
+        } else if (typeof serverError === 'string') {
+          setSubmitError(serverError);
+        } else {
+          setSubmitError("Ошибка при отправке заявки. Попробуйте позже.");
+        }
+      } else {
+        setSubmitError(error.message || "Произошла ошибка при отправке заявки. Попробуйте позже.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClear = () => {
@@ -184,7 +217,7 @@ export const Application = () => {
               type="text"
               placeholder="Введите адрес"
               required
-              value={formData.address}
+              value={formData.address || ""}
               onChange={(e) => handleInputChange("address", e.target.value)}
             />
 
@@ -195,7 +228,7 @@ export const Application = () => {
               type="number"
               placeholder="Введите количество"
               required
-              value={formData.dogs_count}
+              value={formData.dogs_count || ""}
               onChange={(e) => handleInputChange("dogs_count", parseInt(e.target.value) || 0)}
             />
 
@@ -217,7 +250,7 @@ export const Application = () => {
                   { label: "Агрессивное", value: "agressor" },
                   { label: "Не агрессивное", value: "non agressor" },
                 ]}
-                value={formData.behavior}
+                value={formData.behavior || ""}
                 onValueChange={handleSelectChange("behavior")}
                 />
 
@@ -239,7 +272,7 @@ export const Application = () => {
                   { label: "Срочно", value: "agressor" },
                   { label: "Не срочно", value: "non fast" },
                 ]}
-                value={formData.urgency}
+                value={formData.urgency || ""}
                 onValueChange={handleSelectChange("urgency")}
                 />
           </div> 
@@ -270,7 +303,7 @@ export const Application = () => {
               <Select
               placeholder="Выберите заявителя"
                 items={applicantOptions}
-                value={formData.applicant.id}
+                value={formData.applicant.id || ""}
                 onValueChange={handleSelectChange("applicant")}
                 />
 
@@ -278,7 +311,7 @@ export const Application = () => {
               <Select
               placeholder="Выберите сведения о заявителе"
                 items={sourceOptions}
-                value={formData.source.id}
+                value={formData.source.id || ""}
                 onValueChange={handleSelectChange("source")}
                 />
 
@@ -289,7 +322,7 @@ export const Application = () => {
               type="text"
               placeholder="Введите контактное лицо"
               required
-              value={formData.contact_person}
+              value={formData.contact_person || ""}
               onChange={(e) => handleInputChange("contact_person", e.target.value)}
             />
           </div>
@@ -299,7 +332,7 @@ export const Application = () => {
         {/* Кнопки */}
         <div className="flex items-center mt-6 w-full gap-6">
           <Button variant={"cube"} size={"default"} color={"grey"} className="flex-1" onClick={handleClear}>Очистить форму</Button>
-          <Button variant={"cube"} size={"default"} color="default" className="flex-1">Подать заявку</Button>
+          <Button variant={"cube"} size={"default"} color="default" className="flex-1" onClick={handleSubmit}>Подать заявку</Button>
         </div>
       </div>
     </div>
