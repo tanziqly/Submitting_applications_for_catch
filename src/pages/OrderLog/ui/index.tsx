@@ -1,7 +1,5 @@
 import { ApplicationsTable } from "@shared/ui/orders";
 import { Sidebar } from "@shared/ui/sidebar";
-import { ClipboardPlus } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const tableData = [
   {
@@ -34,30 +32,6 @@ const tableData = [
     urgency: "Срочно",
     date: "21.07.2025",
   },
-  {
-    id: 5,
-    applicant: "- Глава администрации Васильевского сельсовета",
-    urgency: "Срочно",
-    date: "21.07.2025",
-  },
-  {
-    id: 5,
-    applicant: "- Глава администрации Васильевского сельсовета",
-    urgency: "Срочно",
-    date: "21.07.2025",
-  },
-  {
-    id: 5,
-    applicant: "- Глава администрации Васильевского сельсовета",
-    urgency: "Срочно",
-    date: "21.07.2025",
-  },
-  {
-    id: 5,
-    applicant: "- Глава администрации Васильевского сельсовета",
-    urgency: "Срочно",
-    date: "21.07.2025",
-  },
 ];
 
 export const OrderLog = () => {
@@ -69,11 +43,13 @@ export const OrderLog = () => {
       {/* Контент */}
       <main className="flex-1 border-l border-gray-200 px-6 space-y-6">
         {/* Таблица */}
-        <ApplicationsTable
-          title={"Все заявки"}
-          data={tableData}
-          showMoreButton={false}
-        />
+        <div className="sm:w-full w-[380px] overflow-x-auto">
+          <ApplicationsTable
+            title={"Все заявки"}
+            data={tableData}
+            showMoreButton={false}
+          />
+        </div>
       </main>
     </div>
   );

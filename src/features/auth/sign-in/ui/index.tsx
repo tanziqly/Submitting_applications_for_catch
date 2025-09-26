@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { Button } from "@shared/ui/button";
 import { InputWithLabel } from "@shared/ui/inputLabel";
@@ -75,12 +75,14 @@ export const SignInForm = () => {
       )}
 
       {/* ===== ФОРМА ВХОДА ===== */}
-      <div className="flex justify-between items-center border-1 rounded-xl">
+      <div className="flex justify-between items-center sm:border-1 rounded-xl">
         <form
           onSubmit={onSubmit}
           className="flex flex-col gap-4 rounded-xl mx-16 dark:bg-[#151B28] w-full"
         >
-          <h3 className="text-center text-[16px] font-semibold mb-6">Вход в личный кабинет</h3>
+          <h3 className="text-center text-[16px] font-semibold mb-6">
+            Вход в личный кабинет
+          </h3>
 
           <div className="w-full md:w-[450px]">
             <InputWithLabel
@@ -89,6 +91,7 @@ export const SignInForm = () => {
               type="text"
               placeholder="Введите ваш логин"
               value={login}
+              className="w-full"
               onChange={(e) => setLogin(e.target.value)}
             />
           </div>
@@ -96,19 +99,16 @@ export const SignInForm = () => {
           <InputWithPassword
             label="Пароль"
             value={password}
+            className="w-full"
             onChange={(e) => setPassword(e.target.value)}
           />
-
-
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Входим..." : "Войти"}
           </Button>
-
         </form>
-        <img src={Dog} alt="собака" />
+        <img src={Dog} alt="собака" className="hidden sm:block" />
       </div>
     </>
   );
 };
-

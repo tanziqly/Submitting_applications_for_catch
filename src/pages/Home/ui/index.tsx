@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@shared/ui/button";
+import { RefreshCcwDot } from "lucide-react";
+import { File } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 
 export const Home = () => {
   return (
@@ -27,6 +30,28 @@ export const Home = () => {
               Подать заявку →
             </Button>
           </Link>
+        </div>
+        <div className="flex items-center flex-col mt-20">
+          <span className="font-bold sm:text-xl text-[#65819F]">
+            Как это работает:
+          </span>
+          <div className="flex gap-6 mt-4 flex-col md:flex-row">
+            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-[370px] flex justify-center sm:w-[250px] rounded-[8px] bg-white text-sm font-medium">
+              <RefreshCcwDot className="size-[48px] text-[#0239C9]" /> Заполните
+              <br />
+              заявку
+            </div>
+            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-[370px] flex justify-center sm:w-[250px] rounded-[8px] bg-white text-sm font-medium">
+              <File className="size-[48px] text-[#0239C9]" /> Обработка
+              <br />
+              заявки
+            </div>
+            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-[370px] flex justify-center sm:w-[250px] rounded-[8px] bg-white text-sm font-medium">
+              <CircleCheck className="size-[48px] text-[#0239C9]" /> Принимаются
+              <br />
+              меры
+            </div>
+          </div>
         </div>
       </div>
     </section>

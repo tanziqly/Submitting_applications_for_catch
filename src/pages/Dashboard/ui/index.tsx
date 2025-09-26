@@ -72,9 +72,12 @@ export const DashboardPage = () => {
       {/* Контент */}
       <main className="flex-1 border-l border-gray-200 p-6 space-y-6">
         {/* Статистика */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="sm:w-full w-[350px] overflow-x-auto flex gap-6">
           {stats.map((item) => (
-            <Card key={item.label} className="shadow-sm">
+            <Card
+              key={item.label}
+              className="w-[250px] shadow-sm min-w-[200px] sm:w-[250px]"
+            >
               <CardContent className="px-6 text-left">
                 <div className="text-4xl font-medium">{item.value}</div>
                 <div className="text-gray-600">{item.label}</div>
@@ -84,35 +87,41 @@ export const DashboardPage = () => {
         </div>
 
         {/* График */}
-        <Card className="border-none shadow-none">
-          <CardHeader>
-            <CardTitle>Статистика заявок</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <div className="sm:w-full w-[350px] overflow-x-auto">
+          <div className="sm:w-full w-[900px]">
+            <Card className="border-none shadow-none">
+              <CardHeader>
+                <CardTitle>Статистика заявок</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#3B82F6"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Таблица */}
-        <ApplicationsTable
-          title="Последние заявки"
-          data={tableData}
-          showMoreButton={true}
-          maxVisibleRows={5}
-        />
+        <div className="sm:w-full w-[380px] overflow-x-auto">
+          <ApplicationsTable
+            title="Последние заявки"
+            data={tableData}
+            showMoreButton={true}
+            maxVisibleRows={5}
+          />
+        </div>
       </main>
     </div>
   );
