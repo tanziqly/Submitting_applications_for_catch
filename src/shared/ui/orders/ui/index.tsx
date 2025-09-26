@@ -8,6 +8,14 @@ import {
   TableBody,
   TableCell,
 } from "@shared/ui/table";
+import { Button } from "@shared/ui/button";
+import { ArrowDownWideNarrow } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@shared/ui/dropdown-menu";
 
 interface TableRowData {
   id: number;
@@ -34,7 +42,24 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
   return (
     <Card className="border-none shadow-none">
       <CardHeader>
-        <CardTitle className="text-xl font-medium">{title}</CardTitle>
+        <div className="flex items-center justify-between w-full">
+          <CardTitle className="text-xl font-medium">{title}</CardTitle>
+          {!showMoreButton && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="rounded-sm gap-2" variant="outline">
+                  Сортировать <ArrowDownWideNarrow size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>По номеру</DropdownMenuItem>
+                <DropdownMenuItem>По заявителю</DropdownMenuItem>
+                <DropdownMenuItem>По срочности</DropdownMenuItem>
+                <DropdownMenuItem>По дате</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Table>

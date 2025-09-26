@@ -9,13 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ApplicationsTable } from "@shared/ui/orders";
-import { Link } from "react-router-dom";
-import { ClipboardPlus } from "lucide-react";
-
-// --- FSD структура ---
-// src/pages/dashboard/ui/DashboardPage.tsx
-// src/pages/dashboard/lib/data.ts
-// src/pages/dashboard/index.ts
+import { Sidebar } from "@shared/ui/sidebar";
 
 const stats = [
   { label: "Всего заявок", value: 54 },
@@ -74,27 +68,7 @@ export const DashboardPage = () => {
   return (
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
       {/* Сайдбар */}
-      <div>
-        <div className="text-xl mt-4 font-medium flex items-center gap-2 mb-4">
-          <ClipboardPlus /> Главная
-        </div>
-        <aside className="w-60 rounded-xl border border-gray-200 h-fit mr-4 p-4 space-y-2">
-          <nav className="flex flex-col gap-2 text-base">
-            <button className="w-full text-left rounded-md text-base px-4 py-2 bg-blue-100 font-medium hover:bg-blue-200 transition">
-              Главная
-            </button>
-            <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
-              <Link to="/order-log">Журнал заявок</Link>
-            </button>
-            <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
-              Профиль
-            </button>
-            <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
-              Выйти
-            </button>
-          </nav>
-        </aside>
-      </div>
+      <Sidebar />
       {/* Контент */}
       <main className="flex-1 border-l border-gray-200 p-6 space-y-6">
         {/* Статистика */}
