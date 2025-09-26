@@ -1,30 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { saveToken, removeToken, getToken } from "../api/authHelpers";
-
-// === Типы под твою таблицу ===
-export type User = {
-  id: string;
-  full_name: string;
-  role: string;
-  login: string;
-};
-
-export type AuthResponse = {
-  user: User;
-  token: string;
-};
-
-export type SignInDto = {
-  login: string;
-  password: string;
-};
-
-export type SignUpDto = {
-  full_name: string;
-  role: string;
-  login: string;
-  password: string;
-};
+import type { User, SignInDto, AuthResponse } from "../api/types";
 
 // === Store ===
 class AuthStore {
@@ -69,7 +45,7 @@ class AuthStore {
     this.error = null;
     try {
       const { api } = await import("@shared/api/axios");
-      const { data } = await api.post<AuthResponse>("/auth/login/", dto);
+      const { data } = await api.post<AuthResponse>("/auth/sign-in/", dto);
 
       runInAction(() => {
         this.user = data.user;
@@ -85,52 +61,6 @@ class AuthStore {
         this.error = "Ошибка входа";
       });
       return false;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
-  }
-
-  async signUp(dto: SignUpDto): Promise<{ success: true } | { success: false; error: string }> {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      const { api } = await import("@shared/api/axios");
-      const { data } = await api.post<AuthResponse>("/auth/register/", dto);
-
-      runInAction(() => {
-        this.user = data.user;
-        this.token = data.token;
-        saveToken(data.token);
-        this.isAuthChecked = true;
-      });
-
-      await this.loadUserProfile();
-
-      return { success: true };
-    } catch (e: any) {
-      let errorMessage = "Ошибка регистрации. Попробуйте позже.";
-      const responseData = e?.response?.data;
-
-      if (e.response?.status === 400 && responseData && typeof responseData === "object") {
-        try {
-          const messages: string[] = [];
-          Object.entries(responseData).forEach(([_, value]) => {
-            if (Array.isArray(value)) messages.push(...value);
-            else if (typeof value === "string") messages.push(value);
-            else messages.push(JSON.stringify(value));
-          });
-          if (messages.length > 0) errorMessage = messages.join(" ");
-        } catch {}
-      }
-
-      runInAction(() => {
-        this.error = errorMessage;
-      });
-
-      return { success: false, error: errorMessage };
     } finally {
       runInAction(() => {
         this.loading = false;

@@ -1,20 +1,16 @@
 export interface SignInDto {
-  email: string;
-  password: string;
-}
-
-export type SignUpDto = {
-  full_name: string;
-  role: string;
   login: string;
   password: string;
 };
 
+export type User = {
+  id: string;
+  full_name: string;
+  role: string;
+  login: string;
+};
+
 export type AuthResponse = {
-  user: {
-    id: string;
-    full_name: string;
-    role: string;
-  };
+  user: User;
   token: string;
 };

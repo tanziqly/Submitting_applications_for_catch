@@ -9,7 +9,6 @@ export const useAuth = () => {
       loading: authStore.loading,
       error: authStore.error,
       signIn: authStore.signIn.bind(authStore),
-      signUp: authStore.signUp.bind(authStore),
       logout: authStore.logout.bind(authStore),
     }),
     []
