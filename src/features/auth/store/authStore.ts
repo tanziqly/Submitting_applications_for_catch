@@ -45,7 +45,7 @@ class AuthStore {
     this.error = null;
     try {
       const { api } = await import("@shared/api/axios");
-      const { data } = await api.post<AuthResponse>("/auth/sign-in/", dto);
+      const { data } = await api.post<AuthResponse>("/auth/sign-in", dto);
 
       runInAction(() => {
         this.user = data.user;

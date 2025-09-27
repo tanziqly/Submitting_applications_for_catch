@@ -5,6 +5,14 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    host: '0.0.0.0', // важно для Docker
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      clientPort: 5173, // важно для Docker
+    }
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
