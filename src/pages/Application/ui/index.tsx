@@ -12,147 +12,34 @@ import {
 } from "lucide-react";
 import { Select } from "@shared/ui/dropdown";
 import { Label } from "@shared/ui/label";
-import { useState } from "react";
-import { api } from "@shared/api/axios";
 import { ApplicantOptions, SourceOptions } from "@shared/config/selectOptions";
+import { useHandleSubmit } from "@features/Request/hooks/useHandleSubmit";
 
-
-interface ApplicationData {
-  address: string;
+const initialFormData = {
+  address: "",
   applicant: {
-    id: string;
-  };
-  behavior: string;
-  contact_person: string;
-  dogs_count: number;
-  urgency: string;
+    id: "",
+  },
+  behavior: "",
+  contact_person: "",
+  dogs_count: 0,
+  urgency: "",
   source: {
-    id: string;
-  };
-}
+    id: "",
+  },
+};
 
 export const Application = () => {
-  const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  const [formData, setFormData] = useState<ApplicationData>({
-    address: "",
-    applicant: {
-      id: "",
-    },
-    behavior: "",
-    contact_person: "",
-    dogs_count: 0,
-    urgency: "",
-    source: {
-      id: "",
-    },
-  });
-
-  // Обработчик для текстовых полей
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // Обработчик для селектов
-  const handleSelectChange = (field: string) => (selectedValue: string) => {
-    if (field === "applicant") {
-      setFormData((prev) => ({
-        ...prev,
-        applicant: {
-          id: selectedValue,
-        },
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: selectedValue,
-      }));
-    }
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
-
-    try {
-      // Формируем финальный JSON (убираем поля, которые сервер генерирует сам)
-      const submissionData = {
-        source: {
-          id: formData.source.id,
-        },
-        applicant: {
-          id: formData.applicant.id,
-        },
-        address: formData.address,
-        dogs_count: Number(formData.dogs_count),
-        behavior: formData.behavior,
-        urgency: formData.urgency,
-        contact_person: formData.contact_person,
-      };
-
-      console.log("Отправка данных на /requests:", submissionData);
-
-      // Отправка на API через ваш axios instance
-      const response = await api.post("/requests", submissionData);
-
-      console.log("Успешный ответ от сервера:", response.data);
-
-      setSubmitSuccess(true);
-      handleClear();
-
-      // Автоматически скрываем сообщение об успехе через 5 секунд
-      setTimeout(() => setSubmitSuccess(false), 5000);
-    } catch (error: any) {
-      console.error("Ошибка при отправке заявки:", error);
-
-      // Обработка ошибок через ваш interceptor
-      if (error.response?.data) {
-        // Пытаемся получить сообщение об ошибке от сервера
-        const serverError = error.response.data;
-
-        if (typeof serverError === "object") {
-          // Если ошибка в формате { field: ["error message"] }
-          const errorMessages = Object.values(serverError).flat();
-          setSubmitError(
-            errorMessages.join(", ") || "Ошибка при отправке заявки"
-          );
-        } else if (typeof serverError === "string") {
-          setSubmitError(serverError);
-        } else {
-          setSubmitError("Ошибка при отправке заявки. Попробуйте позже.");
-        }
-      } else {
-        setSubmitError(
-          error.message ||
-            "Произошла ошибка при отправке заявки. Попробуйте позже."
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleClear = () => {
-    setFormData({
-      address: "",
-      applicant: {
-        id: "",
-      },
-      behavior: "",
-      contact_person: "",
-      dogs_count: 0,
-      urgency: "",
-      source: {
-        id: "",
-      },
-    });
-  };
+  const {
+    loading,
+    submitError,
+    submitSuccess,
+    formData,
+    handleInputChange,
+    handleSelectChange,
+    handleSubmit,
+    handleClear,
+  } = useHandleSubmit(initialFormData);
 
   return (
     <div className="h-screen mt-22 sm:mt-0 flex justify-center w-full items-center px-4">

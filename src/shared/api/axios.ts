@@ -1,6 +1,7 @@
+// shared/api/axios.ts
 import axios from "axios";
-import { authStore } from "@features/auth";
 import { API_BASE_URL } from "@shared/config";
+import { getAccessToken, isValidToken, removeTokens } from "@features/auth/api/authHelpers";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,14 +10,24 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = authStore.token;
-  if (token) {
-    config.headers.Authorization = `Token ${token}`;
+api.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    
+    if (isValidToken(token)) {
+      config.headers.Authorization = `Bearer ${token}`; // Изменил на Bearer
+      console.log('Добавлен заголовок Authorization');
+    } else {
+      console.log('Токен невалиден, заголовок не добавлен');
+      delete config.headers.Authorization;
+    }
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  console.log("Interceptor добавляет заголовки:", config.headers);
-  return config;
-});
+);
 
 api.interceptors.response.use(
   (response) => response,
@@ -29,12 +40,13 @@ api.interceptors.response.use(
     console.log("Заголовки запроса:", error.config?.headers);
 
     if (error.response?.status === 401) {
-      console.log("Ошибка аутентификации 401, но НЕ выходим автоматически");
-      // НЕ выходим автоматически, только логируем
-      // authStore.logout();
-      // window.location.href = '/sign-in';
+      console.log('Обнаружена 401 ошибка, выполняем logout');
+      removeTokens();
+      // Можно добавить автоматический logout из store
+      // window.dispatchEvent(new Event('unauthorized'));
     }
     return Promise.reject(error);
   }
 );
+
 export { api };

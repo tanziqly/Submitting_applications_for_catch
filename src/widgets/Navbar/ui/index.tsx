@@ -3,10 +3,12 @@ import { Button } from "@shared/ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "@shared/ui/sheet"; // shadcn/ui
 import { Menu } from "lucide-react";
 import Logo from "@widgets/Navbar/assets/logo.svg";
+import { authStore } from "@features/auth/store/authStore";
+import { observer } from "mobx-react-lite";
 
-export const Navbar = () => {
+export const Navbar = observer(() => {
   // 👉 Здесь любая реальная проверка авторизации:
-  const isAuthenticated = false; // например, стейт из redux, react-query, context
+  const { isAuthenticated, user, logout } = authStore; // например, стейт из redux, react-query, context
 
   const AuthMenu = () => (
     <nav className="flex flex-col gap-2 text-base">
@@ -70,4 +72,4 @@ export const Navbar = () => {
       )}
     </div>
   );
-};
+});

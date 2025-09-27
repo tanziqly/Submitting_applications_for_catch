@@ -6,11 +6,16 @@ export interface SignInDto {
 export type User = {
   id: string;
   full_name: string;
-  role: string;
   login: string;
+  role: string;
 };
 
-export type AuthResponse = {
+export interface AuthResponse {
+  message: string;
+  status: string;
+  tokens: {
+    access_token: string;
+    refresh_token: string;
+  };
   user: User;
-  token: string;
-};
+}
