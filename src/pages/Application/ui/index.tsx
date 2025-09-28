@@ -13,7 +13,7 @@ import {
 import { Select } from "@shared/ui/dropdown";
 import { Label } from "@shared/ui/label";
 import { ApplicantOptions, SourceOptions } from "@shared/config/selectOptions";
-import { useHandleSubmit } from "@features/Request/hooks/useHandleSubmit";
+import { useHandleSubmit } from "@features/request/hooks/useHandleSubmit";
 
 const initialFormData = {
   address: "",
