@@ -30,21 +30,31 @@ export const useHandleSubmit = (initialFormData: ApplicationData) => {
   };
 
   // Обработчик для селектов
-  const handleSelectChange = (field: string) => (selectedValue: string) => {
-    if (field === "applicant") {
-      setFormData((prev) => ({
-        ...prev,
-        applicant: {
-          id: selectedValue,
-        },
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: selectedValue,
-      }));
-    }
-  };
+const handleSelectChange = (field: string) => (selectedValue: string) => {
+  console.log(`handleSelectChange: ${field} = ${selectedValue}`);
+  
+  if (field === "applicant") {
+    setFormData((prev) => ({
+      ...prev,
+      applicant: {
+        id: selectedValue,
+      },
+    }));
+  } else if (field === "source") {
+    // ИСПРАВЛЕНО: для source тоже создаем объект с id
+    setFormData((prev) => ({
+      ...prev,
+      source: {
+        id: selectedValue,
+      },
+    }));
+  } else {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: selectedValue,
+    }));
+  }
+};
 
   const handleSubmit = async () => {
     setLoading(true);
