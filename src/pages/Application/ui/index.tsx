@@ -14,6 +14,14 @@ import { Select } from "@shared/ui/dropdown";
 import { Label } from "@shared/ui/label";
 import { ApplicantOptions, SourceOptions } from "@shared/config/selectOptions";
 import { useHandleSubmit } from "@features/request/hooks/useHandleSubmit";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@shared/ui/dialog";
 
 const initialFormData = {
   address: "",
@@ -30,6 +38,8 @@ const initialFormData = {
 };
 
 export const Application = () => {
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  
   const {
     loading,
     submitError,
@@ -37,13 +47,50 @@ export const Application = () => {
     formData,
     handleInputChange,
     handleSelectChange,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
     handleClear,
   } = useHandleSubmit(initialFormData);
 
+  // Функция для показа подтверждения
+  const handleSubmitClick = () => {
+    // Проверяем обязательные поля перед показом модального окна
+    if (!formData.address || !formData.applicant.id || !formData.contact_person || 
+        !formData.behavior || !formData.urgency || formData.dogs_count <= 0) {
+      alert("Заполните все обязательные поля");
+      return;
+    }
+    setShowConfirmation(true);
+  };
+
+  // Функция подтверждения отправки
+  const handleConfirmSubmit = async () => {
+    await originalHandleSubmit();
+    setShowConfirmation(false);
+  };
+
+  // Функция отмены отправки
+  const handleCancelSubmit = () => {
+    setShowConfirmation(false);
+  };
+
   return (
     <div className="h-screen mt-22 sm:mt-0 flex justify-center w-full items-center px-4">
+      
       <div className="w-[1050px] mx-auto p-6 border-1 border-gray-300 rounded-xl bg-white">
+        {/* Сообщения об ошибках/успехе */}
+        {submitError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="text-red-800 font-medium">Ошибка отправки</div>
+            <div className="text-red-600 mt-1">{submitError}</div>
+          </div>
+        )}
+
+        {submitSuccess && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="text-green-800 font-medium">Успешно!</div>
+            <div className="text-green-600 mt-1">Заявка успешно отправлена</div>
+          </div>
+        )}
         {/* Заголовок */}
         <h2 className="text-lg font-semibold flex items-center gap-2 mb-1">
           <ClipboardPlus /> Подача заявки
@@ -51,6 +98,8 @@ export const Application = () => {
         <p className="text-sm text-gray-400 mb-6">
           * Заполните все поля для подачи заявки
         </p>
+
+        
 
         {/* Контент через flex */}
         <div className="flex flex-col md:flex-row gap-8">
@@ -67,6 +116,7 @@ export const Application = () => {
               required
               value={formData.address || ""}
               onChange={(e) => handleInputChange("address", e.target.value)}
+              // disabled={loading}
             />
 
             <InputWithLabel
@@ -80,18 +130,8 @@ export const Application = () => {
               onChange={(e) =>
                 handleInputChange("dogs_count", parseInt(e.target.value) || 0)
               }
+              // disabled={loading}
             />
-
-            {/* <div>
-              <label className="block text-sm text-gray-600 mb-1">Поведение</label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:ring-blue-300"
-                required
-              >
-                <option value="aggressive">Агрессивное</option>
-                <option value="calm">Спокойное</option>
-              </select>
-            </div> */}
 
             <Label>
               <Smile className="h-5 w-5" /> Поведение
@@ -104,18 +144,8 @@ export const Application = () => {
               ]}
               value={formData.behavior || ""}
               onValueChange={handleSelectChange("behavior")}
+              disabled={loading}
             />
-
-            {/* <div>
-              <label className="block text-sm text-gray-600 mb-1">Срочность</label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:ring-blue-300"
-                required
-              >
-                <option value="medium">Срочно</option>
-                <option value="high">Не срочно</option>
-              </select>
-            </div>*/}
 
             <Label>
               <Clock className="h-5 w-5" /> Срочность
@@ -128,6 +158,7 @@ export const Application = () => {
               ]}
               value={formData.urgency || ""}
               onValueChange={handleSelectChange("urgency")}
+              disabled={loading}
             />
           </div>
 
@@ -137,23 +168,6 @@ export const Application = () => {
               Информация о заявителе
             </h3>
 
-            {/* <InputWithLabel
-              icon={<UserRound className="h-5 w-5"/>}
-              label="Заявитель"
-              id="applicant"
-              type="text"
-              placeholder="Введите заявителя"
-              required
-            />
-
-            <InputWithLabel
-              icon={<FileUser className="h-5 w-5"/>}
-              label="Сведения о заявителе"
-              id="applicantInfo"
-              type="text"
-              placeholder="Введите сведения"
-            /> */}
-
             <Label>
               <UserRound className="h-5 w-5" /> Заявитель
             </Label>
@@ -162,6 +176,7 @@ export const Application = () => {
               items={ApplicantOptions}
               value={formData.applicant.id || ""}
               onValueChange={handleSelectChange("applicant")}
+              disabled={loading}
             />
 
             <Label>
@@ -172,6 +187,7 @@ export const Application = () => {
               items={SourceOptions}
               value={formData.source.id || ""}
               onValueChange={handleSelectChange("source")}
+              disabled={loading}
             />
 
             <InputWithLabel
@@ -185,6 +201,7 @@ export const Application = () => {
               onChange={(e) =>
                 handleInputChange("contact_person", e.target.value)
               }
+              // disabled={loading}
             />
           </div>
         </div>
@@ -197,6 +214,7 @@ export const Application = () => {
             color={"grey"}
             className="flex-1"
             onClick={handleClear}
+            disabled={loading}
           >
             Очистить форму
           </Button>
@@ -205,12 +223,47 @@ export const Application = () => {
             size={"default"}
             color="default"
             className="flex-1"
-            onClick={handleSubmit}
+            onClick={handleSubmitClick}
+            disabled={loading}
           >
-            Подать заявку
+            {loading ? "Отправка..." : "Подать заявку"}
           </Button>
         </div>
       </div>
+
+      {/* Модальное окно подтверждения из shadcn */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Подтверждение отправки</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Вы уверены, что хотите отправить заявку? Проверьте правильность введенных данных.
+            </p>
+          </div>
+          <DialogFooter className="flex gap-2 sm:justify-end">
+            <Button
+            className="w-[125px]"
+              variant="cube"
+              color="grey"
+              onClick={handleCancelSubmit}
+              disabled={loading}
+            >
+              Отмена
+            </Button>
+            <Button
+            className="w-[125px]"
+             variant="cube"
+              color="default"
+              onClick={handleConfirmSubmit}
+              disabled={loading}
+            >
+              {loading ? "Отправка..." : "Продолжить"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

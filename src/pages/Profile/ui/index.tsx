@@ -108,14 +108,14 @@ export const Profile = observer(() => {
             <CardFooter className="flex space-x-2 max-w-2xl w-full">
               <div className="flex-1">
                 <Button 
-                  className="bg-[#E6E8EB] text-[#ACBBCB] border-none w-full"
+                  className="bg-[#E6E8EB] text-black border-none w-full"
                   variant="outline"
                 >
                   Отменить
                 </Button>
               </div>
               <div className="flex-1">
-                <Button className="bg-blue-600 hover:bg-blue-700 w-full">
+                <Button className="bg-blue-600 hover:bg-blue-700 w-full rounded-sm">
                   Сохранить
                 </Button>
               </div>

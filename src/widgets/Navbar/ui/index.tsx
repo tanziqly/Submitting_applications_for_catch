@@ -37,7 +37,7 @@ export const Navbar = observer(() => {
   );
 
   return (
-    <div className="max-w-[1440px] bg-white w-full flex items-center justify-between px-6 py-4 z-50">
+    <div className="max-w-[1440px] bg-white w-full flex items-center justify-between px-6 py-4">
       {/* Логотип */}
       <Link 
       to={isAuthenticated ? "/dashboard" : "/"} 
