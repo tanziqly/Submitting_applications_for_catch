@@ -1,8 +1,9 @@
 import { ClipboardPlus } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { authStore } from "@features/auth";
 export const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <aside className="hidden sm:block w-60 rounded-xl border border-gray-200 h-fit mr-4 p-4">
@@ -40,7 +41,11 @@ export const Sidebar = () => {
         >
           Профиль
         </Link>
-        <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
+        <button className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition"
+        onClick={() => {
+    authStore.logout();
+    navigate('/');
+  }}>
           Выйти
         </button>
       </nav>

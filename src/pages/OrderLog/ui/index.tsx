@@ -15,10 +15,18 @@ export const OrderLog = () => {
       try {
         setLoading(true);
         const data = await getRequests();
+        
+        console.log('Полученные данные:', data);
+        console.log('Тип данных:', typeof data);
+        console.log('Является массивом:', Array.isArray(data));
+        console.log('Количество элементов:', data.length);
+        
         setRequests(data);
         setError(null);
       } catch (err: any) {
         console.error('Ошибка при загрузке заявок:', err);
+        console.error('Данные ошибки:', err.response?.data);
+        
         setError(
           err.response?.data?.message || 
           err.message || 
@@ -32,19 +40,24 @@ export const OrderLog = () => {
     fetchRequests();
   }, []);
 
-  // Преобразуем данные для таблицы
-  const tableData = requests.map(request => ({
-    id: request.id,
-    number: request.number,
-    applicant: request.applicant.name,
-    address: request.address,
-    dogsCount: request.dogs_count,
-    urgency: request.urgency,
-    status: request.status,
-    date: new Date(request.created_at).toLocaleDateString('ru-RU'),
-    behavior: request.behavior,
-    contactPerson: request.contact_person,
-  }));
+ // pages/order-log.tsx
+// Преобразуем данные для таблицы с проверкой
+const tableData = requests.map(request => ({
+  id: request.id,
+  number: request.number || 'Не указан',
+  applicant: request.applicant?.name || 'Не указан',
+  address: request.address || 'Не указан',
+  dogsCount: request.dogs_count || 0,
+  urgency: request.urgency || 'Не указана',
+  status: request.status || 'Не указан',
+  date: request.created_at 
+    ? new Date(request.created_at).toLocaleDateString('ru-RU')
+    : 'Не указана',
+  behavior: request.behavior || 'Не указано',
+  contactPerson: request.contact_person || 'Не указано',
+  source: request.source || 'Не указано',
+}));
+
 
   if (loading) {
     return (
@@ -83,19 +96,6 @@ export const OrderLog = () => {
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
       <Sidebar />
       <main className="flex-1 border-l border-gray-200 px-6 space-y-6">
-        {/* Статистика */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{requests.length}</div>
-            <div className="text-blue-800">Всего заявок</div>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
-              {requests.filter(r => r.urgency === 'Срочно').length}
-            </div>
-            <div className="text-green-800">Срочные</div>
-          </div>
-        </div>
 
         {/* Таблица */}
         <div className="sm:w-full w-[380px] overflow-x-auto">

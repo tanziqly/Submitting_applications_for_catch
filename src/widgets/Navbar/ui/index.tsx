@@ -37,9 +37,12 @@ export const Navbar = observer(() => {
   );
 
   return (
-    <div className="max-w-[1440px] bg-white w-full flex items-center justify-between px-6 py-4 border-b">
+    <div className="max-w-[1440px] bg-white w-full flex items-center justify-between px-6 py-4 z-50">
       {/* Логотип */}
-      <Link to="/" className="flex items-center gap-2">
+      <Link 
+      to={isAuthenticated ? "/dashboard" : "/"} 
+      className="flex items-center gap-2"
+      >
         <img src={Logo} alt="логотип" />
       </Link>
 
@@ -59,16 +62,23 @@ export const Navbar = observer(() => {
         </div>
       ) : (
         // 👉 гамбургер-меню
+        <>
         <Sheet>
           <SheetTrigger asChild>
-            <button className="p-2 rounded-md hover:bg-gray-100">
+            <button className="p-2 rounded-md hover:bg-gray-100 md:hidden">
               <Menu className="w-6 h-6" />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-60 p-4">
+          <SheetContent side="left" className="w-60 p-4 md:hidden">
             <AuthMenu />
           </SheetContent>
         </Sheet>
+        <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium">{user?.full_name || user?.login || 'Пользователь'}</span>
+          </div>
+        </div>
+      </>
       )}
     </div>
   );

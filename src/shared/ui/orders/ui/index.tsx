@@ -19,19 +19,23 @@ import {
 import { Link } from "react-router-dom";
 
 interface TableRowData {
-  id: number | string; // Поддержка и number и string
-  number?: string; // Номер заявки из API
+  id: number | string;
+  number?: string;
   applicant: string;
   urgency: string;
   date: string;
   address?: string;
-  dogsCount?: number; // Для соответствия API
+  dogsCount?: number;
   quantity?: number;
   behavior?: string;
   applicantName?: string;
   applicantInfo?: string;
   contactPerson?: string;
   status?: string;
+  source?: { // ← Добавлено поле source
+    id: string;
+    name: string;
+  };
 }
 
 interface ApplicationsTableProps {
@@ -50,7 +54,7 @@ const OrderModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl p-6 w-full max-w-[350px] shadow-lg relative">
+      <div className="bg-white rounded-xl p-6 w-full max-w-[450px] shadow-lg relative">
         <button
           className="absolute text-4xl cursor-pointer top-2 right-2 text-gray-400 hover:text-gray-600"
           onClick={onClose}
@@ -75,7 +79,7 @@ const OrderModal: React.FC<{
             <b>Имя заявителя:</b> {data.applicantName || data.applicant}
           </div>
           <div>
-            <b>Сведения о заявителе:</b> {data.applicantInfo || "-"}
+            <b>Сведения о заявителе:</b> {data.source?.name || data.applicantInfo || "-"} {/* ← Исправлено */}
           </div>
           <div>
             <b>Контактное лицо:</b> {data.contactPerson || "-"}
@@ -169,7 +173,7 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                 className="cursor-pointer hover:bg-blue-50 transition"
                 onClick={() => handleRowClick(row)}
               >
-                <TableCell className="text-center">{row.number || row.id}</TableCell>
+                <TableCell className="text-center">{row.number}</TableCell>
                 <TableCell>{row.applicant}</TableCell>
                 <TableCell>{row.urgency}</TableCell>
                 <TableCell>{row.date}</TableCell>

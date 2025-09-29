@@ -32,7 +32,7 @@ export const SignInForm = () => {
       const success = await signIn({ login, password });
 
       if (success) {
-        const from = location.state?.from?.pathname || "/";
+        const from = location.state?.from?.pathname || "/dashboard";
         navigate(from, { replace: true });
       } else {
         setError("Неверный логин или пароль. Попробуйте снова.");

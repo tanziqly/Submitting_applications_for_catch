@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@shared/ui/button";
 import { RefreshCcwDot } from "lucide-react";
 import { File } from "lucide-react";
-import { CircleCheck } from "lucide-react";
+import { CircleCheck, ArrowRight } from "lucide-react";
 
 export const Home = () => {
   return (
@@ -27,7 +27,8 @@ export const Home = () => {
         <div className="mt-8">
           <Link to="/application">
             <Button variant="default" size="default" color="default">
-              Подать заявку →
+              Подать заявку
+              <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
         </div>
