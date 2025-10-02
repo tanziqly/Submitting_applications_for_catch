@@ -75,16 +75,16 @@ export const SignInForm = () => {
       )}
 
       {/* ===== ФОРМА ВХОДА ===== */}
-      <div className="flex justify-between items-center sm:border-1 rounded-xl">
+      <div className="flex justify-between items-center lg:border-1 rounded-xl">
         <form
           onSubmit={onSubmit}
-          className="flex flex-col gap-4 rounded-xl mx-16 dark:bg-[#151B28] w-full"
+          className="flex flex-col gap-4 rounded-xl py-10 mx-16 dark:bg-[#151B28] w-full"
         >
           <h3 className="text-center text-[16px] font-semibold mb-6">
             Вход в личный кабинет
           </h3>
 
-          <div className="w-full md:w-[450px]">
+          <div className="w-[300px] lg:w-[450px]">
             <InputWithLabel
               label="Логин"
               id="login"
@@ -107,7 +107,7 @@ export const SignInForm = () => {
             {loading ? "Входим..." : "Войти"}
           </Button>
         </form>
-        <img src={Dog} alt="собака" className="hidden sm:block" />
+        <img src={Dog} alt="собака" className="hidden w-full lg:block" />
       </div>
     </>
   );

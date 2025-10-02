@@ -39,23 +39,32 @@ export const Navbar = observer(() => {
   return (
     <div className="max-w-[1440px] bg-white w-full flex items-center justify-between px-6 py-4">
       {/* Логотип */}
-      <Link 
-      to={isAuthenticated ? "/dashboard" : "/"} 
-      className="flex items-center gap-2"
+      <Link
+        to={isAuthenticated ? "/dashboard" : "/"}
+        className="flex items-center gap-2"
       >
-        <img src={Logo} alt="логотип" />
+        <img src={Logo} className="w-[100px] sm:w-full" alt="логотип" />
       </Link>
 
       {/* Правый блок */}
       {!isAuthenticated ? (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           <Link to="/sign-in">
-            <Button variant="default" size="default" color="outline">
+            <Button
+              variant="default"
+              className="py-1 px-3 sm:py-2 sm:px-4"
+              size="default"
+              color="outline"
+            >
               Войти
             </Button>
           </Link>
           <Link to="/application">
-            <Button variant="default" size="default">
+            <Button
+              variant="default"
+              className="py-1 px-3 sm:py-2 sm:px-4"
+              size="default"
+            >
               Подать заявку
             </Button>
           </Link>
@@ -63,22 +72,24 @@ export const Navbar = observer(() => {
       ) : (
         // 👉 гамбургер-меню
         <>
-        <Sheet>
-          <SheetTrigger asChild>
-            <button className="p-2 rounded-md hover:bg-gray-100 md:hidden">
-              <Menu className="w-6 h-6" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-60 p-4 md:hidden">
-            <AuthMenu />
-          </SheetContent>
-        </Sheet>
-        <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium">{user?.full_name || user?.login || 'Пользователь'}</span>
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="p-2 rounded-md hover:bg-gray-100 md:hidden">
+                <Menu className="w-6 h-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-60 p-4 md:hidden">
+              <AuthMenu />
+            </SheetContent>
+          </Sheet>
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">
+                {user?.full_name || user?.login || "Пользователь"}
+              </span>
+            </div>
           </div>
-        </div>
-      </>
+        </>
       )}
     </div>
   );

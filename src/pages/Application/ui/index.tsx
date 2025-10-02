@@ -39,7 +39,7 @@ const initialFormData = {
 
 export const Application = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  
+
   const {
     loading,
     submitError,
@@ -54,8 +54,14 @@ export const Application = () => {
   // Функция для показа подтверждения
   const handleSubmitClick = () => {
     // Проверяем обязательные поля перед показом модального окна
-    if (!formData.address || !formData.applicant.id || !formData.contact_person || 
-        !formData.behavior || !formData.urgency || formData.dogs_count <= 0) {
+    if (
+      !formData.address ||
+      !formData.applicant.id ||
+      !formData.contact_person ||
+      !formData.behavior ||
+      !formData.urgency ||
+      formData.dogs_count <= 0
+    ) {
       alert("Заполните все обязательные поля");
       return;
     }
@@ -74,8 +80,7 @@ export const Application = () => {
   };
 
   return (
-    <div className="h-screen mt-22 sm:mt-0 flex justify-center w-full items-center px-4">
-      
+    <div className="sm:h-screen h-full mt-20 sm:mt-0 flex justify-center w-full sm:items-center px-4">
       <div className="w-[1050px] mx-auto p-6 border-1 border-gray-300 rounded-xl bg-white">
         {/* Сообщения об ошибках/успехе */}
         {submitError && (
@@ -98,8 +103,6 @@ export const Application = () => {
         <p className="text-sm text-gray-400 mb-6">
           * Заполните все поля для подачи заявки
         </p>
-
-        
 
         {/* Контент через flex */}
         <div className="flex flex-col md:flex-row gap-8">
@@ -235,16 +238,19 @@ export const Application = () => {
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">Подтверждение отправки</DialogTitle>
+            <DialogTitle className="text-xl">
+              Подтверждение отправки
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-gray-600">
-              Вы уверены, что хотите отправить заявку? Проверьте правильность введенных данных.
+              Вы уверены, что хотите отправить заявку? Проверьте правильность
+              введенных данных.
             </p>
           </div>
           <DialogFooter className="flex gap-2 sm:justify-end">
             <Button
-            className="w-[125px]"
+              className="w-[125px]"
               variant="cube"
               color="grey"
               onClick={handleCancelSubmit}
@@ -253,8 +259,8 @@ export const Application = () => {
               Отмена
             </Button>
             <Button
-            className="w-[125px]"
-             variant="cube"
+              className="w-[125px]"
+              variant="cube"
               color="default"
               onClick={handleConfirmSubmit}
               disabled={loading}

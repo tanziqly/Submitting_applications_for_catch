@@ -6,7 +6,7 @@ import { CircleCheck, ArrowRight } from "lucide-react";
 
 export const Home = () => {
   return (
-    <section className="w-full flex bg-gradient-to-b from-[#FFFFFF] to-[rgba(202,221,255,0.51)] flex-col items-center justify-center min-h-screen text-center px-4">
+    <section className="w-full sm:mt-0 mt-12 flex bg-gradient-to-b from-[#FFFFFF] to-[rgba(202,221,255,0.51)] flex-col items-center justify-center min-h-screen text-center px-4">
       <div className="max-w-[1440px]">
         {/* Заголовок */}
         <h1 className="text-[35px] font-bold leading-tight text-[#6582A0] md:text-[65px]">
@@ -32,22 +32,22 @@ export const Home = () => {
             </Button>
           </Link>
         </div>
-        <div className="flex items-center flex-col mt-20">
+        <div className="flex items-center flex-col mt-4 md:mt-20 sm:mt-10">
           <span className="font-bold sm:text-xl text-[#65819F]">
             Как это работает:
           </span>
-          <div className="flex gap-6 mt-4 flex-col md:flex-row">
-            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-[370px] flex justify-center sm:w-[250px] rounded-[8px] bg-white text-sm font-medium">
+          <div className="flex md:w-fit w-full gap-6 mt-4 flex-col md:flex-row">
+            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-full md:w-[250px] justify-center rounded-[8px] bg-white text-sm font-medium">
               <RefreshCcwDot className="size-[48px] text-[#0239C9]" /> Заполните
               <br />
               заявку
             </div>
-            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-[370px] flex justify-center sm:w-[250px] rounded-[8px] bg-white text-sm font-medium">
+            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-full md:w-[250px] justify-center rounded-[8px] bg-white text-sm font-medium">
               <File className="size-[48px] text-[#0239C9]" /> Обработка
               <br />
               заявки
             </div>
-            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-[370px] flex justify-center sm:w-[250px] rounded-[8px] bg-white text-sm font-medium">
+            <div className="flex gap-1 text-left items-center leading-[24px] px-12 py-4 w-full md:w-[250px] justify-center rounded-[8px] bg-white text-sm font-medium">
               <CircleCheck className="size-[48px] text-[#0239C9]" /> Принимаются
               <br />
               меры
