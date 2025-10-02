@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@shared/ui/card";
 import {
   Table,
@@ -9,7 +9,7 @@ import {
   TableCell,
 } from "@shared/ui/table";
 import { Button } from "@shared/ui/button";
-import { ArrowDownWideNarrow } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowUpDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +32,7 @@ interface TableRowData {
   applicantInfo?: string;
   contactPerson?: string;
   status?: string;
-  source?: { // ← Добавлено поле source
+  source?: {
     id: string;
     name: string;
   };
@@ -44,6 +44,9 @@ interface ApplicationsTableProps {
   showMoreButton?: boolean;
   maxVisibleRows?: number;
 }
+
+type SortField = 'number' | 'applicant' | 'urgency' | 'date';
+type SortDirection = 'asc' | 'desc';
 
 const OrderModal: React.FC<{
   open: boolean;
@@ -61,7 +64,7 @@ const OrderModal: React.FC<{
         >
           ×
         </button>
-        <h2 className="text-2xl font-semibold mb-4">Заявка №{data.number || data.id}</h2>
+        <h2 className="text-2xl font-semibold mb-4">Заявка №{data.number}</h2>
         <div className="space-y-2 mb-4">
           <div>
             <b>Адрес:</b> {data.address || "-"}
@@ -79,7 +82,7 @@ const OrderModal: React.FC<{
             <b>Имя заявителя:</b> {data.applicantName || data.applicant}
           </div>
           <div>
-            <b>Сведения о заявителе:</b> {data.source?.name || data.applicantInfo || "-"} {/* ← Исправлено */}
+            <b>Сведения о заявителе:</b> {data.source?.name || data.applicantInfo || "-"}
           </div>
           <div>
             <b>Контактное лицо:</b> {data.contactPerson || "-"}
@@ -119,11 +122,58 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TableRowData | undefined>();
-  const displayedData = maxVisibleRows ? data.slice(0, maxVisibleRows) : data;
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  // Функция для сортировки данных
+  const sortedData = useMemo(() => {
+    const sorted = [...data].sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+
+      // Для дат преобразуем в timestamp для корректной сортировки
+      if (sortField === 'date') {
+        aValue = new Date(aValue.split('.').reverse().join('-')).getTime();
+        bValue = new Date(bValue.split('.').reverse().join('-')).getTime();
+      }
+
+      // Для строк приводим к нижнему регистру для case-insensitive сортировки
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return maxVisibleRows ? sorted.slice(0, maxVisibleRows) : sorted;
+  }, [data, sortField, sortDirection, maxVisibleRows]);
 
   const handleRowClick = (row: TableRowData) => {
     setSelectedRow(row);
     setModalOpen(true);
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Если уже сортируем по этому полю, меняем направление
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Если новое поле, устанавливаем его и направление по умолчанию
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown size={16} />;
+    return sortDirection === 'asc' ? '↑' : '↓';
   };
 
   return (
@@ -143,10 +193,26 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>По номеру</DropdownMenuItem>
-                <DropdownMenuItem>По заявителю</DropdownMenuItem>
-                <DropdownMenuItem>По срочности</DropdownMenuItem>
-                <DropdownMenuItem>По дате</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort('number')}>
+                  <span className="flex items-center gap-2">
+                    По номеру {getSortIcon('number')}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort('applicant')}>
+                  <span className="flex items-center gap-2">
+                    По заявителю {getSortIcon('applicant')}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort('urgency')}>
+                  <span className="flex items-center gap-2">
+                    По срочности {getSortIcon('urgency')}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSort('date')}>
+                  <span className="flex items-center gap-2">
+                    По дате {getSortIcon('date')}
+                  </span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -154,20 +220,20 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
       </CardHeader>
       <CardContent>
         <Table>
-          <TableHeader>
+           <TableHeader>
             <TableRow className="bg-[#CADDFF]">
-              <TableHead className="text-center text-[#6C6C6E] rounded-l-xl">
+              <TableHead className="text-center text-[#6C6C6E]">
                 Номер заявки
               </TableHead>
               <TableHead className="text-[#6C6C6E]">Заявитель</TableHead>
               <TableHead className="text-[#6C6C6E]">Срочность</TableHead>
-              <TableHead className="text-[#6C6C6E] rounded-r-xl">
+              <TableHead className="text-[#6C6C6E]">
                 Дата подачи
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {displayedData.map((row) => (
+            {sortedData.map((row) => (
               <TableRow
                 key={row.id}
                 className="cursor-pointer hover:bg-blue-50 transition"
