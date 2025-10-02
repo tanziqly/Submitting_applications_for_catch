@@ -36,6 +36,7 @@ interface TableRowData {
     id: string;
     name: string;
   };
+  sortableNumber?: number; // Добавляем числовое поле для сортировки
 }
 
 interface ApplicationsTableProps {
@@ -45,7 +46,7 @@ interface ApplicationsTableProps {
   maxVisibleRows?: number;
 }
 
-type SortField = 'number' | 'applicant' | 'urgency' | 'date';
+type SortField = 'sortableNumber' | 'applicant' | 'urgency' | 'date';
 type SortDirection = 'asc' | 'desc';
 
 const OrderModal: React.FC<{
@@ -64,7 +65,7 @@ const OrderModal: React.FC<{
         >
           ×
         </button>
-        <h2 className="text-2xl font-semibold mb-4">Заявка №{data.number}</h2>
+        <h2 className="text-2xl font-semibold mb-4">Заявка {data.number}</h2>
         <div className="space-y-2 mb-4">
           <div>
             <b>Адрес:</b> {data.address || "-"}
@@ -122,12 +123,29 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TableRowData | undefined>();
-  const [sortField, setSortField] = useState<SortField>('date');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField>('sortableNumber');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  // Добавляем числовое поле для сортировки по номеру
+  const processedData = useMemo(() => {
+    return data.map((item, index) => ({
+      ...item,
+      sortableNumber: extractNumberFromString(item.number) || index + 1
+    }));
+  }, [data]);
+
+  // Функция для извлечения числа из строки номера
+  function extractNumberFromString(str?: string): number {
+    if (!str) return 0;
+    
+    // Убираем "№" и другие нечисловые символы, оставляем только цифры
+    const numbers = str.replace(/[^\d]/g, '');
+    return numbers ? parseInt(numbers, 10) : 0;
+  }
 
   // Функция для сортировки данных
   const sortedData = useMemo(() => {
-    const sorted = [...data].sort((a, b) => {
+    const sorted = [...processedData].sort((a, b) => {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
 
@@ -153,7 +171,7 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
     });
 
     return maxVisibleRows ? sorted.slice(0, maxVisibleRows) : sorted;
-  }, [data, sortField, sortDirection, maxVisibleRows]);
+  }, [processedData, sortField, sortDirection, maxVisibleRows]);
 
   const handleRowClick = (row: TableRowData) => {
     setSelectedRow(row);
@@ -193,9 +211,9 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleSort('number')}>
+                <DropdownMenuItem onClick={() => handleSort('sortableNumber')}>
                   <span className="flex items-center gap-2">
-                    По номеру {getSortIcon('number')}
+                    По номеру {getSortIcon('sortableNumber')}
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleSort('applicant')}>
@@ -220,15 +238,39 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
       </CardHeader>
       <CardContent>
         <Table>
-           <TableHeader>
+          <TableHeader>
             <TableRow className="bg-[#CADDFF]">
-              <TableHead className="text-center text-[#6C6C6E]">
-                Номер заявки
+              <TableHead 
+                className="text-center text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
+                onClick={() => handleSort('sortableNumber')}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  Номер заявки {getSortIcon('sortableNumber')}
+                </div>
               </TableHead>
-              <TableHead className="text-[#6C6C6E]">Заявитель</TableHead>
-              <TableHead className="text-[#6C6C6E]">Срочность</TableHead>
-              <TableHead className="text-[#6C6C6E]">
-                Дата подачи
+              <TableHead 
+                className="text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
+                onClick={() => handleSort('applicant')}
+              >
+                <div className="flex items-center gap-1">
+                  Заявитель {getSortIcon('applicant')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
+                onClick={() => handleSort('urgency')}
+              >
+                <div className="flex items-center gap-1">
+                  Срочность {getSortIcon('urgency')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
+                onClick={() => handleSort('date')}
+              >
+                <div className="flex items-center gap-1">
+                  Дата подачи {getSortIcon('date')}
+                </div>
               </TableHead>
             </TableRow>
           </TableHeader>

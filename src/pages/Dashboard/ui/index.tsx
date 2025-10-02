@@ -95,10 +95,10 @@ export const DashboardPage = () => {
     setChartData(chartData);
   };
 
-  // Преобразование данных для таблицы
-  const tableData = requests.slice(0, 5).map(request => ({
+  // Преобразование данных для таблицы с порядковыми номерами
+  const tableData = requests.slice(0, 5).map((request, index) => ({
     id: request.id,
-    number: request.number || `APP-${request.id.substring(0, 8).toUpperCase()}`,
+    number: `${index + 1}`, // Простой порядковый номер
     applicant: request.applicant?.name || 'Не указан',
     urgency: request.urgency || 'Не указана',
     date: request.created_at 

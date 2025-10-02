@@ -40,24 +40,22 @@ export const OrderLog = () => {
     fetchRequests();
   }, []);
 
- // pages/order-log.tsx
-// Преобразуем данные для таблицы с проверкой
-const tableData = requests.map(request => ({
-  id: request.id,
-  number: request.number || 'Не указан',
-  applicant: request.applicant?.name || 'Не указан',
-  address: request.address || 'Не указан',
-  dogsCount: request.dogs_count || 0,
-  urgency: request.urgency || 'Не указана',
-  status: request.status || 'Не указан',
-  date: request.created_at 
-    ? new Date(request.created_at).toLocaleDateString('ru-RU')
-    : 'Не указана',
-  behavior: request.behavior || 'Не указано',
-  contactPerson: request.contact_person || 'Не указано',
-  source: request.source || 'Не указано',
-}));
-
+  // Преобразуем данные для таблицы с порядковыми номерами
+  const tableData = requests.map((request, index) => ({
+    id: request.id,
+    number: `${index + 1}`, // Простой порядковый номер
+    applicant: request.applicant?.name || 'Не указан',
+    address: request.address || 'Не указан',
+    dogsCount: request.dogs_count || 0,
+    urgency: request.urgency || 'Не указана',
+    status: request.status || 'Не указан',
+    date: request.created_at 
+      ? new Date(request.created_at).toLocaleDateString('ru-RU')
+      : 'Не указана',
+    behavior: request.behavior || 'Не указано',
+    contactPerson: request.contact_person || 'Не указано',
+    source: request.source || { id: '', name: '' },
+  }));
 
   if (loading) {
     return (
