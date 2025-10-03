@@ -13,8 +13,8 @@ import { Sidebar } from "@shared/ui/sidebar";
 import { useState, useEffect } from "react";
 import { getRequests } from "@features/request/hooks/useRequestsLog";
 import type { Request } from "@features/request/hooks/useRequestsLog";
+import { Autoscroll } from "@shared/autoscroll";
 
-// Тип для статистики
 interface DashboardStats {
   total: number;
   new: number;
@@ -22,7 +22,6 @@ interface DashboardStats {
   completed: number;
 }
 
-// Тип для данных графика
 interface ChartData {
   name: string;
   value: number;
@@ -36,11 +35,10 @@ export const DashboardPage = () => {
     total: 0,
     new: 0,
     inProgress: 0,
-    completed: 0
+    completed: 0,
   });
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
-  // Загрузка данных
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -51,8 +49,8 @@ export const DashboardPage = () => {
         generateChartData(data);
         setError(null);
       } catch (err: any) {
-        console.error('Ошибка при загрузке данных:', err);
-        setError('Произошла ошибка при загрузке данных');
+        console.error("Ошибка при загрузке данных:", err);
+        setError("Произошла ошибка при загрузке данных");
       } finally {
         setLoading(false);
       }
@@ -61,55 +59,62 @@ export const DashboardPage = () => {
     fetchData();
   }, []);
 
-  // Расчет статистики
   const calculateStats = (data: Request[]) => {
     const stats: DashboardStats = {
       total: data.length,
-      new: data.filter(request => request.status === 'Новая' || request.status === 'new').length,
-      inProgress: data.filter(request => request.status === 'В работе' || request.status === 'in_progress').length,
-      completed: data.filter(request => request.status === 'Завершена' || request.status === 'completed').length
+      new: data.filter(
+        (request) => request.status === "Новая" || request.status === "new"
+      ).length,
+      inProgress: data.filter(
+        (request) =>
+          request.status === "В работе" || request.status === "in_progress"
+      ).length,
+      completed: data.filter(
+        (request) =>
+          request.status === "Завершена" || request.status === "completed"
+      ).length,
     };
     setStats(stats);
   };
 
-  // Генерация данных для графика (последние 10 дней)
   const generateChartData = (data: Request[]) => {
     const last10Days = Array.from({ length: 10 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      return date.toLocaleDateString('ru-RU');
+      return date.toLocaleDateString("ru-RU");
     }).reverse();
 
-    const chartData = last10Days.map(date => {
-      const count = data.filter(request => {
-        const requestDate = new Date(request.created_at).toLocaleDateString('ru-RU');
+    const chartData = last10Days.map((date) => {
+      const count = data.filter((request) => {
+        const requestDate = new Date(request.created_at).toLocaleDateString(
+          "ru-RU"
+        );
         return requestDate === date;
       }).length;
 
       return {
         name: date,
-        value: count
+        value: count,
       };
     });
 
     setChartData(chartData);
   };
 
-  // Преобразование данных для таблицы с порядковыми номерами
   const tableData = requests.slice(0, 5).map((request, index) => ({
     id: request.id,
-    number: `${index + 1}`, // Простой порядковый номер
-    applicant: request.applicant?.name || 'Не указан',
-    urgency: request.urgency || 'Не указана',
-    date: request.created_at 
-      ? new Date(request.created_at).toLocaleDateString('ru-RU')
-      : 'Не указана',
-    address: request.address || 'Не указан',
+    number: `${index + 1}`,
+    applicant: request.applicant?.name || "Не указан",
+    urgency: request.urgency || "Не указана",
+    date: request.created_at
+      ? new Date(request.created_at).toLocaleDateString("ru-RU")
+      : "Не указана",
+    address: request.address || "Не указан",
     dogsCount: request.dogs_count || 0,
-    behavior: request.behavior || 'Не указано',
-    contactPerson: request.contact_person || 'Не указано',
-    status: request.status || 'Не указан',
-    source: request.source || { id: '', name: '' }
+    behavior: request.behavior || "Не указано",
+    contactPerson: request.contact_person || "Не указано",
+    status: request.status || "Не указан",
+    source: request.source || { id: "", name: "" },
   }));
 
   const statsCards = [
@@ -140,7 +145,7 @@ export const DashboardPage = () => {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="text-red-800 font-medium">Ошибка загрузки</div>
             <div className="text-red-600 mt-1">{error}</div>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
             >
@@ -154,18 +159,14 @@ export const DashboardPage = () => {
 
   return (
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-      {/* Сайдбар */}
       <Sidebar />
-      
-      {/* Контент */}
-      <main className="flex-1 border-l border-gray-200 p-6 space-y-6">
+
+      <main className="flex-1 w-full border-l border-gray-200 p-6 space-y-6">
         {/* Статистика */}
-        <div className="sm:w-full w-[350px] overflow-x-auto flex gap-6">
+
+        <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
           {statsCards.map((item) => (
-            <Card
-              key={item.label}
-              className="w-[250px] shadow-sm min-w-[200px] sm:w-[250px]"
-            >
+            <Card key={item.label} className="w-[250px] shrink-0 shadow-sm">
               <CardContent className="px-6 text-left">
                 <div className="text-4xl font-medium">{item.value}</div>
                 <div className="text-gray-600">{item.label}</div>
@@ -173,10 +174,9 @@ export const DashboardPage = () => {
             </Card>
           ))}
         </div>
-
         {/* График */}
-        <div className="sm:w-full w-[350px] overflow-x-auto">
-          <div className="sm:w-full w-[900px]">
+        <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
+          <div className="min-w-[700px] sm:min-w-full">
             <Card className="border-none shadow-none">
               <CardHeader>
                 <CardTitle>Статистика заявок за последние 10 дней</CardTitle>
@@ -185,8 +185,8 @@ export const DashboardPage = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={chartData}>
                     <CartesianGrid stroke="#E5E7EB" strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="name" 
+                    <XAxis
+                      dataKey="name"
                       tick={{ fontSize: 12 }}
                       interval={0}
                       angle={-45}
@@ -194,8 +194,8 @@ export const DashboardPage = () => {
                       height={80}
                     />
                     <YAxis />
-                    <Tooltip 
-                      formatter={(value) => [`${value} заявок`, 'Количество']}
+                    <Tooltip
+                      formatter={(value) => [`${value} заявок`, "Количество"]}
                       labelFormatter={(label) => `Дата: ${label}`}
                     />
                     <Line
@@ -203,8 +203,8 @@ export const DashboardPage = () => {
                       dataKey="value"
                       stroke="#3B82F6"
                       strokeWidth={2}
-                      dot={{ fill: '#3B82F6', strokeWidth: 2 }}
-                      activeDot={{ r: 6, fill: '#1D4ED8' }}
+                      dot={{ fill: "#3B82F6", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "#1D4ED8" }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -214,7 +214,7 @@ export const DashboardPage = () => {
         </div>
 
         {/* Таблица */}
-        <div className="sm:w-full w-[380px] overflow-x-auto">
+        <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
           <ApplicationsTable
             title="Последние заявки"
             data={tableData}

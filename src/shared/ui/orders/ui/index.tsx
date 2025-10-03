@@ -46,8 +46,8 @@ interface ApplicationsTableProps {
   maxVisibleRows?: number;
 }
 
-type SortField = 'sortableNumber' | 'applicant' | 'urgency' | 'date';
-type SortDirection = 'asc' | 'desc';
+type SortField = "sortableNumber" | "applicant" | "urgency" | "date";
+type SortDirection = "asc" | "desc";
 
 const OrderModal: React.FC<{
   open: boolean;
@@ -83,7 +83,8 @@ const OrderModal: React.FC<{
             <b>Имя заявителя:</b> {data.applicantName || data.applicant}
           </div>
           <div>
-            <b>Сведения о заявителе:</b> {data.source?.name || data.applicantInfo || "-"}
+            <b>Сведения о заявителе:</b>{" "}
+            {data.source?.name || data.applicantInfo || "-"}
           </div>
           <div>
             <b>Контактное лицо:</b> {data.contactPerson || "-"}
@@ -123,23 +124,23 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TableRowData | undefined>();
-  const [sortField, setSortField] = useState<SortField>('sortableNumber');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<SortField>("sortableNumber");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   // Добавляем числовое поле для сортировки по номеру
   const processedData = useMemo(() => {
     return data.map((item, index) => ({
       ...item,
-      sortableNumber: extractNumberFromString(item.number) || index + 1
+      sortableNumber: extractNumberFromString(item.number) || index + 1,
     }));
   }, [data]);
 
   // Функция для извлечения числа из строки номера
   function extractNumberFromString(str?: string): number {
     if (!str) return 0;
-    
+
     // Убираем "№" и другие нечисловые символы, оставляем только цифры
-    const numbers = str.replace(/[^\d]/g, '');
+    const numbers = str.replace(/[^\d]/g, "");
     return numbers ? parseInt(numbers, 10) : 0;
   }
 
@@ -150,22 +151,22 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
       let bValue: any = b[sortField];
 
       // Для дат преобразуем в timestamp для корректной сортировки
-      if (sortField === 'date') {
-        aValue = new Date(aValue.split('.').reverse().join('-')).getTime();
-        bValue = new Date(bValue.split('.').reverse().join('-')).getTime();
+      if (sortField === "date") {
+        aValue = new Date(aValue.split(".").reverse().join("-")).getTime();
+        bValue = new Date(bValue.split(".").reverse().join("-")).getTime();
       }
 
       // Для строк приводим к нижнему регистру для case-insensitive сортировки
-      if (typeof aValue === 'string') {
+      if (typeof aValue === "string") {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
 
       if (aValue < bValue) {
-        return sortDirection === 'asc' ? -1 : 1;
+        return sortDirection === "asc" ? -1 : 1;
       }
       if (aValue > bValue) {
-        return sortDirection === 'asc' ? 1 : -1;
+        return sortDirection === "asc" ? 1 : -1;
       }
       return 0;
     });
@@ -181,22 +182,22 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       // Если уже сортируем по этому полю, меняем направление
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       // Если новое поле, устанавливаем его и направление по умолчанию
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown size={16} />;
-    return sortDirection === 'asc' ? '↑' : '↓';
+    return sortDirection === "asc" ? "↑" : "↓";
   };
 
   return (
-    <Card className="border-none shadow-none">
-      <CardHeader>
+    <Card className="border-none w-full shadow-none">
+      <CardHeader className="w-full">
         <div className="flex items-center justify-between w-full">
           <CardTitle className="text-xl font-medium">{title}</CardTitle>
           {!showMoreButton && (
@@ -211,24 +212,24 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleSort('sortableNumber')}>
+                <DropdownMenuItem onClick={() => handleSort("sortableNumber")}>
                   <span className="flex items-center gap-2">
-                    По номеру {getSortIcon('sortableNumber')}
+                    По номеру {getSortIcon("sortableNumber")}
                   </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort('applicant')}>
+                <DropdownMenuItem onClick={() => handleSort("applicant")}>
                   <span className="flex items-center gap-2">
-                    По заявителю {getSortIcon('applicant')}
+                    По заявителю {getSortIcon("applicant")}
                   </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort('urgency')}>
+                <DropdownMenuItem onClick={() => handleSort("urgency")}>
                   <span className="flex items-center gap-2">
-                    По срочности {getSortIcon('urgency')}
+                    По срочности {getSortIcon("urgency")}
                   </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort('date')}>
+                <DropdownMenuItem onClick={() => handleSort("date")}>
                   <span className="flex items-center gap-2">
-                    По дате {getSortIcon('date')}
+                    По дате {getSortIcon("date")}
                   </span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -240,36 +241,36 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-[#CADDFF]">
-              <TableHead 
+              <TableHead
                 className="text-center text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
-                onClick={() => handleSort('sortableNumber')}
+                onClick={() => handleSort("sortableNumber")}
               >
                 <div className="flex items-center justify-center gap-1">
-                  Номер заявки {getSortIcon('sortableNumber')}
+                  Номер заявки {getSortIcon("sortableNumber")}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
-                onClick={() => handleSort('applicant')}
+                onClick={() => handleSort("applicant")}
               >
                 <div className="flex items-center gap-1">
-                  Заявитель {getSortIcon('applicant')}
+                  Заявитель {getSortIcon("applicant")}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
-                onClick={() => handleSort('urgency')}
+                onClick={() => handleSort("urgency")}
               >
                 <div className="flex items-center gap-1">
-                  Срочность {getSortIcon('urgency')}
+                  Срочность {getSortIcon("urgency")}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
-                onClick={() => handleSort('date')}
+                onClick={() => handleSort("date")}
               >
                 <div className="flex items-center gap-1">
-                  Дата подачи {getSortIcon('date')}
+                  Дата подачи {getSortIcon("date")}
                 </div>
               </TableHead>
             </TableRow>
