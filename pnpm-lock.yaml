@@ -26,6 +26,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.13(vite@7.1.7(@types/node@24.5.2)(jiti@2.6.0)(lightningcss@1.30.1))
+      autoscroll:
+        specifier: ^0.2.1
+        version: 0.2.1
       axios:
         specifier: ^1.12.2
         version: 1.12.2
@@ -1126,6 +1129,9 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
+  autoscroll@0.2.1:
+    resolution: {integrity: sha512-zT8dG+rQRFkyRBR670m11Eo7oVlQ+dYoLEe33rSFySbUSDdxhchzAYmr5HYfZv2JbghGebmdgIYrl0KkS6LzVA==}
+
   axios@1.12.2:
     resolution: {integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==}
 
@@ -1603,6 +1609,9 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
+
+  lodash.throttle@4.1.1:
+    resolution: {integrity: sha512-wIkUCfVKpVsWo3JSZlc+8MB5it+2AN5W8J7YVMST30UrvcQNZ1Okbj+rbVniijTWE6FGYy4XJq/rHkas8qJMLQ==}
 
   lucide-react@0.544.0:
     resolution: {integrity: sha512-t5tS44bqd825zAW45UQxpG2CvcC4urOwn2TrwSH8u+MjeE+1NnWl6QqeQ/6NdjMqdOygyiT9p3Ev0p1NJykxjw==}
@@ -2887,6 +2896,10 @@ snapshots:
 
   asynckit@0.4.0: {}
 
+  autoscroll@0.2.1:
+    dependencies:
+      lodash.throttle: 4.1.1
+
   axios@1.12.2:
     dependencies:
       follow-redirects: 1.15.11
@@ -3345,6 +3358,8 @@ snapshots:
       p-locate: 5.0.0
 
   lodash.merge@4.6.2: {}
+
+  lodash.throttle@4.1.1: {}
 
   lucide-react@0.544.0(react@19.1.1):
     dependencies:

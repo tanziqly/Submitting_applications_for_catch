@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@shared/ui/dropdown-menu";
 import { Link } from "react-router-dom";
+import { api } from "@shared/api/axios";
 
 interface TableRowData {
   id: number | string;
@@ -36,7 +37,7 @@ interface TableRowData {
     id: string;
     name: string;
   };
-  sortableNumber?: number; // Добавляем числовое поле для сортировки
+  sortableNumber?: number;
 }
 
 interface ApplicationsTableProps {
@@ -49,11 +50,121 @@ interface ApplicationsTableProps {
 type SortField = "sortableNumber" | "applicant" | "urgency" | "date";
 type SortDirection = "asc" | "desc";
 
+interface DocumentResponse {
+  status: string;
+  url: string;
+}
+
 const OrderModal: React.FC<{
   open: boolean;
   onClose: () => void;
   data?: TableRowData;
 }> = ({ open, onClose, data }) => {
+  const [loading, setLoading] = useState(false);
+  const [documentError, setDocumentError] = useState<string | null>(null);
+
+  const handleGetDocument = async () => {
+  if (!data?.number) {
+    setDocumentError("Номер заявки не указан");
+    return;
+  }
+
+  setLoading(true);
+  setDocumentError(null);
+
+  try {
+    // Получаем URL для скачивания документа
+    const response = await api.get("/requests/download_url", {
+      params: {
+        number: data.number
+      },
+      validateStatus: (status) => status < 500
+    });
+
+    console.log("📄 Полный ответ сервера:", {
+      status: response.status,
+      data: response.data,
+      headers: response.headers
+    });
+
+    // Проверяем успешный статус - РАССЛАБЛЕННАЯ ПРОВЕРКА
+    if (response.status === 200) {
+      // Вариант 1: Проверяем разные возможные форматы ответа
+      let fileUrl = null;
+      
+      if (response.data.url) {
+        fileUrl = response.data.url;
+      } else if (response.data.downloadUrl) {
+        fileUrl = response.data.downloadUrl;
+      } else if (response.data.fileUrl) {
+        fileUrl = response.data.fileUrl;
+      } else if (typeof response.data === 'string' && response.data.startsWith('http')) {
+        fileUrl = response.data;
+      }
+      
+      console.log("🔗 Найденный URL:", fileUrl);
+
+      if (fileUrl) {
+        // Открываем в новой вкладке - это более надежно
+        console.log("🔄 Открываем документ в новой вкладке...");
+        window.open(fileUrl, '_blank');
+        
+        // Альтернативный способ скачивания
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileUrl;
+        downloadLink.target = '_blank'; // Открывать в новой вкладке
+        downloadLink.rel = 'noopener noreferrer';
+        downloadLink.download = `заявка_${data.number}.docx`;
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Закрываем модальное окно после успешного скачивания
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      } else {
+        console.error("❌ URL не найден в ответе:", response.data);
+        setDocumentError("Сервер не вернул ссылку на документ. Формат ответа: " + JSON.stringify(response.data));
+      }
+    } else if (response.status === 404) {
+      setDocumentError("Документ не найден. Возможно, заявка еще не обработана.");
+    } else if (response.status === 400) {
+      setDocumentError("Неверный номер заявки");
+    } else {
+      setDocumentError(`Сервер вернул статус: ${response.status}`);
+    }
+  } catch (error: any) {
+    console.error("❌ Ошибка при получении документа:", error);
+    
+    // Улучшенная обработка ошибок
+    if (error.code === "ERR_NETWORK") {
+      setDocumentError("Проблемы с подключением к серверу");
+    } else if (error.response?.status === 404) {
+      setDocumentError("Сервис генерации документов временно недоступен");
+    } else if (error.response?.status === 500) {
+      setDocumentError("Ошибка на сервере при генерации документа");
+    } else if (error.response?.data?.message) {
+      // Пытаемся получить сообщение об ошибке из ответа
+      try {
+        const errorData = typeof error.response.data === 'string' 
+          ? JSON.parse(error.response.data) 
+          : error.response.data;
+        setDocumentError(errorData.message || "Произошла ошибка");
+      } catch {
+        setDocumentError("Произошла ошибка при обработке запроса");
+      }
+    } else if (error.message) {
+      setDocumentError(error.message);
+    } else {
+      setDocumentError("Произошла неизвестная ошибка");
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
   if (!open || !data) return null;
 
   return (
@@ -66,6 +177,14 @@ const OrderModal: React.FC<{
           ×
         </button>
         <h2 className="text-2xl font-semibold mb-4">Заявка {data.number}</h2>
+        
+        {/* Сообщение об ошибке */}
+        {documentError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="text-red-800 text-sm">{documentError}</div>
+          </div>
+        )}
+
         <div className="space-y-2 mb-4">
           <div>
             <b>Адрес:</b> {data.address || "-"}
@@ -99,13 +218,15 @@ const OrderModal: React.FC<{
           </Button>
           <Button
             variant="outline"
-            className="bg-neutral-300 hover:text-neutral-300 border-none flex-1"
+            className="bg-neutral-300 hover:bg-neutral-400 border-none flex-1"
+            onClick={handleGetDocument}
+            disabled={loading || !data.number}
           >
-            Отменить
+            {loading ? "Загрузка..." : "Получить документ"}
           </Button>
           <Button
             variant="outline"
-            className="flex-1 bg-white hover:text-neutral-300 border-neutral-300 text-neutral-300"
+            className="flex-1 bg-white hover:bg-gray-100 border-neutral-300 text-neutral-700"
             onClick={onClose}
           >
             Закрыть
@@ -192,7 +313,11 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown size={16} />;
-    return sortDirection === "asc" ? "↑" : "↓";
+    return sortDirection === "asc" ? (
+      <span className="text-sm">↑</span>
+    ) : (
+      <span className="text-sm">↓</span>
+    );
   };
 
   return (
