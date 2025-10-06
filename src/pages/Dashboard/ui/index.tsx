@@ -77,6 +77,19 @@ export const DashboardPage = () => {
     setStats(stats);
   };
 
+  useEffect(() => {
+    calculateStats(requests);
+    generateChartData(requests);
+  }, [requests]);
+
+  const updateRequestStatus = (id: string, newStatus: string) => {
+    setRequests((prevRequests) =>
+      prevRequests.map((req) =>
+        req.id === id ? { ...req, status: newStatus } : req
+      )
+    );
+  };
+
   const generateChartData = (data: Request[]) => {
     const last10Days = Array.from({ length: 10 }, (_, i) => {
       const date = new Date();
@@ -159,7 +172,7 @@ export const DashboardPage = () => {
 
   return (
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-      <Sidebar />
+      <Sidebar className="hidden lg:block" />
 
       <main className="flex-1 w-full border-l border-gray-200 p-6 space-y-6">
         {/* Статистика */}

@@ -25,16 +25,16 @@ export const Profile = observer(() => {
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData(prev => ({
+    setPasswordData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
     if (error) setError(null);
     if (success) setSuccess(false);
@@ -44,7 +44,7 @@ export const Profile = observer(() => {
     setPasswordData({
       oldPassword: "",
       newPassword: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
     setError(null);
     setSuccess(false);
@@ -52,7 +52,11 @@ export const Profile = observer(() => {
 
   const handleChangePassword = async () => {
     // Валидация
-    if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.oldPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       setError("Заполните все поля");
       return;
     }
@@ -75,12 +79,15 @@ export const Profile = observer(() => {
       const changePasswordData: ChangePasswordData = {
         login: user?.login || "",
         old_password: passwordData.oldPassword, // изменено на old_password
-        new_password: passwordData.newPassword  // изменено на new_password
+        new_password: passwordData.newPassword, // изменено на new_password
       };
 
       console.log("Отправка данных смены пароля:", changePasswordData);
 
-      const response = await api.post("/auth/change-password", changePasswordData);
+      const response = await api.post(
+        "/auth/change-password",
+        changePasswordData
+      );
 
       console.log("Ответ сервера:", response.data);
 
@@ -89,13 +96,13 @@ export const Profile = observer(() => {
         setPasswordData({
           oldPassword: "",
           newPassword: "",
-          confirmPassword: ""
+          confirmPassword: "",
         });
       }
     } catch (err: any) {
       console.error("Ошибка при смене пароля:", err);
       console.error("Данные ошибки:", err.response?.data);
-      
+
       // Более детальная обработка ошибок
       if (err.response?.status === 400) {
         setError("Неверный старый пароль или некорректные данные");
@@ -115,10 +122,12 @@ export const Profile = observer(() => {
   if (!user) {
     return (
       <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-        <Sidebar />
+        <Sidebar className="hidden lg:block" />
         <main className="flex-1 border-l border-gray-200 mt-10 px-6 space-y-6">
           <div className="max-w-2xl p-2">
-            <div className="text-center py-8">Загрузка данных пользователя...</div>
+            <div className="text-center py-8">
+              Загрузка данных пользователя...
+            </div>
           </div>
         </main>
       </div>
@@ -127,12 +136,14 @@ export const Profile = observer(() => {
 
   return (
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-      <Sidebar />
+      <Sidebar className="hidden lg:block" />
       <main className="flex-1 border-l border-gray-200 mt-10 px-6 space-y-6">
         <div className="max-w-2xl p-2">
           <Card className="space-y-1 border-none shadow-none">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold">Общая информация</CardTitle>
+              <CardTitle className="text-xl font-semibold">
+                Общая информация
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -164,7 +175,9 @@ export const Profile = observer(() => {
 
           <Card className="space-y-1 border-none shadow-none">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold">Смена пароля</CardTitle>
+              <CardTitle className="text-xl font-semibold">
+                Смена пароля
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {error && (
@@ -175,7 +188,9 @@ export const Profile = observer(() => {
 
               {success && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="text-green-800 text-sm">Пароль успешно изменен!</div>
+                  <div className="text-green-800 text-sm">
+                    Пароль успешно изменен!
+                  </div>
                 </div>
               )}
 
@@ -186,7 +201,9 @@ export const Profile = observer(() => {
                   type="password"
                   placeholder="Введите старый пароль"
                   value={passwordData.oldPassword}
-                  onChange={(e) => handlePasswordChange("oldPassword", e.target.value)}
+                  onChange={(e) =>
+                    handlePasswordChange("oldPassword", e.target.value)
+                  }
                   disabled={loading}
                 />
               </div>
@@ -197,25 +214,31 @@ export const Profile = observer(() => {
                   type="password"
                   placeholder="Введите новый пароль"
                   value={passwordData.newPassword}
-                  onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
+                  onChange={(e) =>
+                    handlePasswordChange("newPassword", e.target.value)
+                  }
                   disabled={loading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Подтвердите новый пароль</Label>
+                <Label htmlFor="confirmPassword">
+                  Подтвердите новый пароль
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   placeholder="Подтвердите новый пароль"
                   value={passwordData.confirmPassword}
-                  onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
+                  onChange={(e) =>
+                    handlePasswordChange("confirmPassword", e.target.value)
+                  }
                   disabled={loading}
                 />
               </div>
             </CardContent>
             <CardFooter className="flex space-x-2 max-w-2xl w-full">
               <div className="flex-1">
-                <Button 
+                <Button
                   className="bg-[#E6E8EB] text-black border-none w-full"
                   variant="outline"
                   onClick={handleCancel}
@@ -225,7 +248,7 @@ export const Profile = observer(() => {
                 </Button>
               </div>
               <div className="flex-1">
-                <Button 
+                <Button
                   className="bg-blue-600 hover:bg-blue-700 w-full rounded-sm"
                   onClick={handleChangePassword}
                   disabled={loading}

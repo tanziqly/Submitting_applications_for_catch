@@ -10,8 +10,13 @@ import {
   DialogFooter,
 } from "@shared/ui/dialog";
 import { Button } from "@shared/ui/button";
+import clsx from "clsx";
 
-export const Sidebar = () => {
+interface SidebarProps {
+  className?: string;
+}
+
+export const Sidebar = ({ className }: SidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
@@ -22,7 +27,7 @@ export const Sidebar = () => {
 
   const handleConfirmLogout = () => {
     authStore.logout();
-    navigate('/');
+    navigate("/");
     setShowLogoutConfirmation(false);
   };
 
@@ -31,7 +36,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="hidden sm:block w-60 h-fit mr-4 p-4">
+    <aside className={clsx(className, "w-60 h-fit mr-4 p-4")}>
       <div className="text-xl mt-2 mb-4 font-medium flex items-center gap-2">
         <ClipboardPlus /> Главная
       </div>
@@ -66,7 +71,7 @@ export const Sidebar = () => {
         >
           Профиль
         </Link>
-        <button 
+        <button
           className="w-full text-left rounded-md px-4 py-2 hover:bg-gray-100 transition"
           onClick={handleLogoutClick}
         >
@@ -75,19 +80,20 @@ export const Sidebar = () => {
       </nav>
 
       {/* Модальное окно подтверждения выхода */}
-      <Dialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
+      <Dialog
+        open={showLogoutConfirmation}
+        onOpenChange={setShowLogoutConfirmation}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl">Подтверждение выхода</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-gray-600">
-              Вы уверены?
-            </p>
+            <p className="text-gray-600">Вы уверены?</p>
           </div>
           <DialogFooter className="flex gap-2 sm:justify-end">
             <Button
-            className="w-[125px]"
+              className="w-[125px]"
               variant="outline"
               color="grey"
               onClick={handleCancelLogout}
@@ -95,7 +101,7 @@ export const Sidebar = () => {
               Отмена
             </Button>
             <Button
-            className="w-[125px]"
+              className="w-[125px]"
               variant="destructive"
               color="default"
               onClick={handleConfirmLogout}

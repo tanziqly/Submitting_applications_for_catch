@@ -60,7 +60,7 @@ export const OrderLog = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-        <Sidebar />
+        <Sidebar className="hidden lg:block" />
         <main className="flex-1 border-l border-gray-200 px-6 space-y-6">
           <div className="flex justify-center items-center h-64">
             <div className="text-lg">Загрузка заявок...</div>
@@ -73,7 +73,7 @@ export const OrderLog = () => {
   if (error) {
     return (
       <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-        <Sidebar />
+        <Sidebar className="hidden lg:block" />
         <main className="flex-1 border-l border-gray-200 px-6 space-y-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="text-red-800 font-medium">Ошибка загрузки</div>
@@ -91,8 +91,8 @@ export const OrderLog = () => {
   }
 
   return (
-    <div className="flex-1 min-h-screen w-full max-w-[1440px] mt-20 bg-white">
-      <Sidebar />
+    <div className="flex-1 lg:flex lg:flex-row min-h-screen w-full max-w-[1440px] mt-20 bg-white">
+      <Sidebar className="hidden lg:block" />
       <main className="flex-1 border-l border-gray-200 px-6 space-y-6">
         {/* Таблица */}
         <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">

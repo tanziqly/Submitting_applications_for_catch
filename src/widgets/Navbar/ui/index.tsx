@@ -74,15 +74,15 @@ export const Navbar = observer(() => {
         <>
           <Sheet>
             <SheetTrigger asChild>
-              <button className="p-2 rounded-md hover:bg-gray-100 md:hidden">
+              <button className="p-2 rounded-md hover:bg-gray-100 lg:hidden">
                 <Menu className="w-6 h-6" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-60 p-4 md:hidden">
+            <SheetContent side="left" className="w-60 p-4 lg:hidden">
               <AuthMenu />
             </SheetContent>
           </Sheet>
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm">
               <span className="font-medium">
                 {user?.full_name || user?.login || "Пользователь"}
