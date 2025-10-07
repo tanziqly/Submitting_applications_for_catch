@@ -11,7 +11,6 @@ import { ROUTE_CONSTANTS } from "@shared/config/routes";
 import { Application } from "@pages/Application";
 import { Home } from "@pages/Home";
 import { SignIn } from "@pages/SignIn";
-import { SignUp } from "@pages/SignUp";
 import { NotFound } from "@pages/NotFound";
 import { ServerError } from "@pages/ServerError";
 import { Layout } from "@widgets/Layout";
@@ -47,7 +46,6 @@ export const Router: FC = () => {
         <Routes>
           {/* Публичные маршруты */}
           <Route path={ROUTE_CONSTANTS.SIGNIN} element={<SignIn />} />
-          <Route path={ROUTE_CONSTANTS.SIGNUP} element={<SignUp />} />
           {/* Защищенные маршруты */}
           <Route path={ROUTE_CONSTANTS.HOME} element={<Home />} />
           <Route path={ROUTE_CONSTANTS.APPLICATION} element={<Application />} />

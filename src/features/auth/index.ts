@@ -1,2 +1,2 @@
 export { authStore } from "./store/authStore";
-export type { SignInDto, SignUpDto, AuthResponse } from "./api/types";
+export type { SignInDto, AuthResponse } from "./api/types";

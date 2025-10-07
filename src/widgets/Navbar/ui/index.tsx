@@ -8,7 +8,7 @@ import { observer } from "mobx-react-lite";
 
 export const Navbar = observer(() => {
   // 👉 Здесь любая реальная проверка авторизации:
-  const { isAuthenticated, user, logout } = authStore; // например, стейт из redux, react-query, context
+  const { isAuthenticated, user } = authStore; // например, стейт из redux, react-query, context
 
   const AuthMenu = () => (
     <nav className="flex flex-col gap-2 text-base">
