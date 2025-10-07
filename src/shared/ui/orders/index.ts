@@ -1,1 +1,1 @@
-export { default as ApplicationsTable } from "./ui";
+export { ApplicationsTable } from "./ui";

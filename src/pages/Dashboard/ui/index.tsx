@@ -10,132 +10,22 @@ import {
 } from "recharts";
 import { ApplicationsTable } from "@shared/ui/orders";
 import { Sidebar } from "@shared/ui/sidebar";
-import { useState, useEffect } from "react";
-import { getRequests } from "@features/request/hooks/useRequestsLog";
-import type { Request } from "@features/request/hooks/useRequestsLog";
-import { Autoscroll } from "@shared/autoscroll";
-
-interface DashboardStats {
-  total: number;
-  new: number;
-  inProgress: number;
-  completed: number;
-}
-
-interface ChartData {
-  name: string;
-  value: number;
-}
+import { useDashboardData } from "@features/dashboard/hooks/useDashboardData";
+import { useTableData } from "@features/dashboard/hooks/useTableData";
+import { useStatsCards } from "@features/dashboard/hooks/useStatsCards";
 
 export const DashboardPage = () => {
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<DashboardStats>({
-    total: 0,
-    new: 0,
-    inProgress: 0,
-    completed: 0,
-  });
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const {
+    requests,
+    loading,
+    error,
+    stats,
+    chartData,
+    updateRequestStatus,
+  } = useDashboardData();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const data = await getRequests();
-        setRequests(data);
-        calculateStats(data);
-        generateChartData(data);
-        setError(null);
-      } catch (err: any) {
-        console.error("Ошибка при загрузке данных:", err);
-        setError("Произошла ошибка при загрузке данных");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const calculateStats = (data: Request[]) => {
-    const stats: DashboardStats = {
-      total: data.length,
-      new: data.filter(
-        (request) => request.status === "Новая" || request.status === "new"
-      ).length,
-      inProgress: data.filter(
-        (request) =>
-          request.status === "В работе" || request.status === "in_progress"
-      ).length,
-      completed: data.filter(
-        (request) =>
-          request.status === "Завершена" || request.status === "completed"
-      ).length,
-    };
-    setStats(stats);
-  };
-
-  useEffect(() => {
-    calculateStats(requests);
-    generateChartData(requests);
-  }, [requests]);
-
-  const updateRequestStatus = (id: string, newStatus: string) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === id ? { ...req, status: newStatus } : req
-      )
-    );
-  };
-
-  const generateChartData = (data: Request[]) => {
-    const last10Days = Array.from({ length: 10 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      return date.toLocaleDateString("ru-RU");
-    }).reverse();
-
-    const chartData = last10Days.map((date) => {
-      const count = data.filter((request) => {
-        const requestDate = new Date(request.created_at).toLocaleDateString(
-          "ru-RU"
-        );
-        return requestDate === date;
-      }).length;
-
-      return {
-        name: date,
-        value: count,
-      };
-    });
-
-    setChartData(chartData);
-  };
-
-  const tableData = requests.slice(0, 5).map((request, index) => ({
-    id: request.id,
-    number: `${index + 1}`,
-    applicant: request.applicant?.name || "Не указан",
-    urgency: request.urgency || "Не указана",
-    date: request.created_at
-      ? new Date(request.created_at).toLocaleDateString("ru-RU")
-      : "Не указана",
-    address: request.address || "Не указан",
-    dogsCount: request.dogs_count || 0,
-    behavior: request.behavior || "Не указано",
-    contactPerson: request.contact_person || "Не указано",
-    status: request.status || "Не указан",
-    source: request.source || { id: "", name: "" },
-  }));
-
-  const statsCards = [
-    { label: "Всего заявок", value: stats.total },
-    { label: "Новые заявки", value: stats.new },
-    { label: "В работе", value: stats.inProgress },
-    { label: "Завершено", value: stats.completed },
-  ];
+  const tableData = useTableData(requests);
+  const statsCards = useStatsCards(stats);
 
   if (loading) {
     return (
@@ -176,7 +66,6 @@ export const DashboardPage = () => {
 
       <main className="flex-1 w-full border-l border-gray-200 p-6 space-y-6">
         {/* Статистика */}
-
         <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
           {statsCards.map((item) => (
             <Card key={item.label} className="w-[250px] shrink-0 shadow-sm">

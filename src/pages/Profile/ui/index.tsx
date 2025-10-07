@@ -11,112 +11,19 @@ import { Button } from "@shared/ui/button";
 import { Label } from "@shared/ui/label";
 import { Sidebar } from "@shared/ui/sidebar";
 import { authStore } from "@features/auth/store/authStore";
-import { useState } from "react";
-import { api } from "@shared/api/axios";
-
-interface ChangePasswordData {
-  login: string;
-  old_password: string;
-  new_password: string;
-}
+import { useProfile } from "@features/profile/hooks/useProfile";
 
 export const Profile = observer(() => {
   const { user } = authStore;
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const handlePasswordChange = (field: string, value: string) => {
-    setPasswordData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    if (error) setError(null);
-    if (success) setSuccess(false);
-  };
-
-  const handleCancel = () => {
-    setPasswordData({
-      oldPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setError(null);
-    setSuccess(false);
-  };
-
-  const handleChangePassword = async () => {
-    // Валидация
-    if (
-      !passwordData.oldPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmPassword
-    ) {
-      setError("Заполните все поля");
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("Новые пароли не совпадают");
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      setError("Пароль должен содержать минимум 6 символов");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-
-    try {
-      const changePasswordData: ChangePasswordData = {
-        login: user?.login || "",
-        old_password: passwordData.oldPassword, // изменено на old_password
-        new_password: passwordData.newPassword, // изменено на new_password
-      };
-
-      console.log("Отправка данных смены пароля:", changePasswordData);
-
-      const response = await api.post(
-        "/auth/change-password",
-        changePasswordData
-      );
-
-      console.log("Ответ сервера:", response.data);
-
-      if (response.status === 200) {
-        setSuccess(true);
-        setPasswordData({
-          oldPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
-      }
-    } catch (err: any) {
-      console.error("Ошибка при смене пароля:", err);
-      console.error("Данные ошибки:", err.response?.data);
-
-      // Более детальная обработка ошибок
-      if (err.response?.status === 400) {
-        setError("Неверный старый пароль или некорректные данные");
-      } else if (err.response?.status === 500) {
-        setError("Ошибка на сервере. Попробуйте позже.");
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Произошла ошибка при смене пароля");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    passwordData,
+    loading,
+    error,
+    success,
+    handlePasswordChange,
+    handleCancel,
+    handleChangePassword,
+  } = useProfile(user?.login || "");
 
   // Если пользователь еще не загружен
   if (!user) {
