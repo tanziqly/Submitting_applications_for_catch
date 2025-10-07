@@ -21,7 +21,6 @@ export const DashboardPage = () => {
     error,
     stats,
     chartData,
-    updateRequestStatus,
   } = useDashboardData();
 
   const tableData = useTableData(requests);
