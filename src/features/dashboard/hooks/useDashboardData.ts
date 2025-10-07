@@ -30,15 +30,13 @@ export const useDashboardData = () => {
     const stats: DashboardStats = {
       total: data.length,
       new: data.filter(
-        (request) => request.status === "Новая" || request.status === "new"
+        (request) => request.status === "новая"
       ).length,
       inProgress: data.filter(
-        (request) =>
-          request.status === "В работе" || request.status === "in_progress"
+        (request) => request.status === "в работе"
       ).length,
       completed: data.filter(
-        (request) =>
-          request.status === "Завершена" || request.status === "completed"
+        (request) => request.status === "выполнена"
       ).length,
     };
     setStats(stats);
@@ -66,14 +64,6 @@ export const useDashboardData = () => {
     });
 
     setChartData(chartData);
-  };
-
-  const updateRequestStatus = (id: string, newStatus: string) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === id ? { ...req, status: newStatus } : req
-      )
-    );
   };
 
   useEffect(() => {
@@ -107,6 +97,5 @@ export const useDashboardData = () => {
     error,
     stats,
     chartData,
-    updateRequestStatus,
   };
 };

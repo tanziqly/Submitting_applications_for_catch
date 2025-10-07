@@ -1,3 +1,4 @@
+// features/dashboard/hooks/useStatsCards.ts
 import type { DashboardStats } from "./useDashboardData";
 
 export interface StatsCard {
