@@ -18,11 +18,10 @@ import {
 } from "@shared/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { api } from "@shared/api/axios";
-import { changeRequestStatus } from "@shared/api/req/changeRequestStatus";
 
 interface TableRowData {
   id: number | string;
-  number?: string;
+  number: string;
   applicant: string;
   urgency: string;
   date: string;
@@ -58,6 +57,18 @@ interface OrderModalProps {
 type SortField = "sortableNumber" | "applicant" | "urgency" | "date";
 type SortDirection = "asc" | "desc";
 
+// Интерфейс для запроса изменения статуса
+interface ChangeStatusRequest {
+  id: string;
+  status: string; // Статус может быть любой строкой, как указано в API
+}
+
+// Функция для изменения статуса через API
+const changeRequestStatus = async (request: ChangeStatusRequest): Promise<void> => {
+  const response = await api.post("/requests/change-status", request);
+  return response.data;
+};
+
 const OrderModal: React.FC<OrderModalProps> = ({
   open,
   onClose,
@@ -78,21 +89,57 @@ const OrderModal: React.FC<OrderModalProps> = ({
 
     try {
       setLoading(true);
+      setDocumentError(null);
+
+      // Отправляем запрос на сервер
       await changeRequestStatus({
         id: String(localData.id),
-        status: newStatus as "новая" | "в работе" | "выполнена" | "отменена",
+        status: newStatus,
       });
 
       // Обновляем локальные данные сразу
       setLocalData((prev) => (prev ? { ...prev, status: newStatus } : prev));
 
-      // Обновляем статус в таблице сразу после успешного запроса
+      // Уведомляем родительский компонент об изменении статуса
       onStatusChange?.(localData.id, newStatus);
 
       setIsStatusEditMode(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Ошибка при обновлении статуса:", err);
-      // Можно добавить уведомление пользователю
+      setDocumentError(
+        err.response?.data?.message || "Не удалось изменить статус заявки"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGetDocument = async () => {
+    if (!localData?.number) {
+      setDocumentError("Номер заявки не указан");
+      return;
+    }
+
+    setLoading(true);
+    setDocumentError(null);
+
+    try {
+      const response = await api.get("/requests/download_url", {
+        params: { number: localData.number },
+        validateStatus: (status) => status < 500,
+      });
+
+      if (response.status === 200 && response.data.url) {
+        window.open(response.data.url, '_blank');
+        setTimeout(() => onClose(), 1000);
+      } else if (response.status === 404) {
+        setDocumentError("Документ не найден");
+      } else {
+        setDocumentError(`Сервер вернул статус: ${response.status}`);
+      }
+    } catch (error: any) {
+      console.error("Ошибка при получении документа:", error);
+      setDocumentError("Ошибка при получении документа");
     } finally {
       setLoading(false);
     }
@@ -121,24 +168,25 @@ const OrderModal: React.FC<OrderModalProps> = ({
 
         {isStatusEditMode ? (
           <div className="space-y-2 mb-4">
+            <div className="text-sm font-medium mb-2">Выберите новый статус:</div>
             {["новая", "в работе", "выполнена", "отменена"].map((status) => (
               <Button
                 key={status}
                 variant="outline"
-                className="w-full bg-neutral-200 uppercase hover:bg-neutral-300 hover:text-black border-none text-black"
+                className="w-full bg-neutral-200 hover:bg-neutral-300 border-none text-black"
                 onClick={() => updateStatus(status)}
                 disabled={loading}
               >
-                {status}
+                {loading ? "Изменение..." : status}
               </Button>
             ))}
             <Button
-              variant="ghost"
-              className="w-full text-white hover:bg-blue-700 hover:text-white mt-4"
+              variant="outline"
+              className="w-full mt-4"
               onClick={() => setIsStatusEditMode(false)}
               disabled={loading}
             >
-              Вернуться назад
+              Отмена
             </Button>
           </div>
         ) : (
@@ -180,7 +228,14 @@ const OrderModal: React.FC<OrderModalProps> = ({
               >
                 Изменить статус
               </Button>
-              {/* Другие кнопки, если нужны */}
+              <Button
+                variant="outline"
+                className="bg-neutral-300 hover:bg-neutral-400 border-none flex-1"
+                onClick={handleGetDocument}
+                disabled={loading}
+              >
+                {loading ? "Загрузка..." : "Получить документ"}
+              </Button>
               <Button
                 variant="outline"
                 className="flex-1 bg-white hover:bg-gray-100 border-neutral-300 text-neutral-700"
@@ -196,35 +251,32 @@ const OrderModal: React.FC<OrderModalProps> = ({
   );
 };
 
-const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
+export const ApplicationsTable = ({
   title,
   data,
   showMoreButton = false,
   maxVisibleRows,
-}) => {
+}: ApplicationsTableProps) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRowId, setSelectedRowId] = useState<string | number | null>(
-    null
-  );
+  const [selectedRowId, setSelectedRowId] = useState<string | number | null>(null);
   const [sortField, setSortField] = useState<SortField>("sortableNumber");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-
   const [tableData, setTableData] = useState<TableRowData[]>(data);
 
   useEffect(() => {
     setTableData(data);
   }, [data]);
 
-  const extractNumberFromString = (str?: string): number => {
+  const extractNumberFromString = (str: string): number => {
     if (!str) return 0;
     const numbers = str.replace(/[^\d]/g, "");
     return numbers ? parseInt(numbers, 10) : 0;
   };
 
   const processedData = useMemo(() => {
-    return tableData.map((item, index) => ({
+    return tableData.map((item) => ({
       ...item,
-      sortableNumber: extractNumberFromString(item.number) || index + 1,
+      sortableNumber: extractNumberFromString(item.number),
     }));
   }, [tableData]);
 
@@ -274,7 +326,6 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
     );
   };
 
-  // Функция для обновления статуса в локальном состоянии таблицы
   const updateStatus = (id: string | number, newStatus: string) => {
     setTableData((prev) =>
       prev.map((item) =>
@@ -283,7 +334,6 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
     );
   };
 
-  // Выбираем актуальные данные для модалки из состояния таблицы
   const selectedRow = selectedRowId
     ? tableData.find((item) => item.id === selectedRowId)
     : undefined;
@@ -393,7 +443,6 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
         )}
       </CardContent>
 
-      {/* Передаем updateStatus для обновления статуса заявки */}
       <OrderModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -403,5 +452,3 @@ const ApplicationsTable: React.FC<ApplicationsTableProps> = ({
     </Card>
   );
 };
-
-export default ApplicationsTable;
