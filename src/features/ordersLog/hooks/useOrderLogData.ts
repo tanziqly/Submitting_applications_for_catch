@@ -55,7 +55,7 @@ export const useOrderLogData = () => {
   }, []);
 
   // Преобразуем данные для таблицы с порядковыми номерами
-  const tableData: TableRowData[] = requests.map((request, index) => ({
+  const tableData: TableRowData[] = requests.map((request) => ({
     id: request.id,
     number: request.number, // Простой порядковый номер
     applicant: request.applicant?.name || "Не указан",

@@ -4,7 +4,7 @@ import { Sidebar } from "@shared/ui/sidebar";
 import { useOrderLogData } from "@features/ordersLog/hooks/useOrderLogData";
 
 export const OrderLog = () => {
-  const { requests, loading, error, tableData } = useOrderLogData();
+  const { loading, error, tableData } = useOrderLogData();
 
   if (loading) {
     return (
