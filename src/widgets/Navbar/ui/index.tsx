@@ -30,7 +30,10 @@ export const Navbar = observer(() => {
       >
         Профиль
       </Link>
-      <button className="text-left rounded-md px-4 py-2 hover:bg-gray-100 transition">
+      <button
+        onClick={logout}
+        className="text-left rounded-md px-4 py-2 hover:bg-gray-100 transition"
+      >
         Выйти
       </button>
     </nav>
