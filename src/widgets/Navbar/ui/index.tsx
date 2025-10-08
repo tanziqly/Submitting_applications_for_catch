@@ -129,45 +129,6 @@ export const Navbar = observer(() => {
                 {user?.full_name || user?.login || "Пользователь"}
               </span>
             </div>
-            {/* Десктопное меню */}
-            <nav className="hidden lg:flex items-center gap-2">
-              <Link
-                to="/dashboard"
-                className={`rounded-md px-3 py-2 text-sm transition ${
-                  location.pathname === "/dashboard"
-                    ? "bg-blue-100 hover:bg-blue-200 font-medium"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                Главная
-              </Link>
-              <Link
-                to="/order-log"
-                className={`rounded-md px-3 py-2 text-sm transition ${
-                  location.pathname === "/order-log"
-                    ? "bg-blue-100 hover:bg-blue-200 font-medium"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                Журнал
-              </Link>
-              <Link
-                to="/profile"
-                className={`rounded-md px-3 py-2 text-sm transition ${
-                  location.pathname === "/profile"
-                    ? "bg-blue-100 hover:bg-blue-200 font-medium"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                Профиль
-              </Link>
-              <button
-                onClick={handleLogoutClick}
-                className="rounded-md px-3 py-2 text-sm hover:bg-gray-100 transition"
-              >
-                Выйти
-              </button>
-            </nav>
           </div>
         </>
       )}
