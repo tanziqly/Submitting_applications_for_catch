@@ -91,7 +91,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <div className="py-4">
             <p className="text-gray-600">Вы уверены?</p>
           </div>
-          <DialogFooter className="flex gap-2 sm:justify-end">
+          <DialogFooter className="flex gap-2 justify-end w-full">
             <Button
               className="w-[125px]"
               variant="outline"
