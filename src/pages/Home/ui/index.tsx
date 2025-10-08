@@ -6,7 +6,7 @@ import { CircleCheck, ArrowRight } from "lucide-react";
 
 export const Home = () => {
   return (
-    <section className="w-full sm:mt-0 mt-12 flex bg-gradient-to-b from-[#FFFFFF] to-[rgba(202,221,255,0.51)] flex-col items-center justify-center min-h-screen text-center px-4">
+    <section className="mt-20 w-full sm:mt-0 flex bg-gradient-to-b from-[#FFFFFF] to-[rgba(202,221,255,0.51)] flex-col items-center justify-center min-h-screen text-center px-4">
       <div className="max-w-[1440px]">
         {/* Заголовок */}
         <h1 className="text-[35px] font-bold leading-tight text-[#6582A0] md:text-[65px]">
