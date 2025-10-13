@@ -18,6 +18,7 @@ import {
 } from "@shared/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { api } from "@shared/api/axios";
+import FilterDropdown from "@shared/ui/filter";
 
 interface TableRowData {
   id: number | string;
@@ -64,7 +65,9 @@ interface ChangeStatusRequest {
 }
 
 // Функция для изменения статуса через API
-const changeRequestStatus = async (request: ChangeStatusRequest): Promise<void> => {
+const changeRequestStatus = async (
+  request: ChangeStatusRequest
+): Promise<void> => {
   const response = await api.post("/requests/change-status", request);
   return response.data;
 };
@@ -130,7 +133,7 @@ const OrderModal: React.FC<OrderModalProps> = ({
       });
 
       if (response.status === 200 && response.data.url) {
-        window.open(response.data.url, '_blank');
+        window.open(response.data.url, "_blank");
         setTimeout(() => onClose(), 1000);
       } else if (response.status === 404) {
         setDocumentError("Документ не найден");
@@ -168,7 +171,9 @@ const OrderModal: React.FC<OrderModalProps> = ({
 
         {isStatusEditMode ? (
           <div className="space-y-2 mb-4">
-            <div className="text-sm font-medium mb-2">Выберите новый статус:</div>
+            <div className="text-sm font-medium mb-2">
+              Выберите новый статус:
+            </div>
             {["новая", "в работе", "выполнена", "отменена"].map((status) => (
               <Button
                 key={status}
@@ -258,7 +263,9 @@ export const ApplicationsTable = ({
   maxVisibleRows,
 }: ApplicationsTableProps) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRowId, setSelectedRowId] = useState<string | number | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | number | null>(
+    null
+  );
   const [sortField, setSortField] = useState<SortField>("sortableNumber");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [tableData, setTableData] = useState<TableRowData[]>(data);
@@ -343,41 +350,7 @@ export const ApplicationsTable = ({
       <CardHeader className="w-full">
         <div className="flex items-center justify-between w-full">
           <CardTitle className="text-xl font-medium">{title}</CardTitle>
-          {!showMoreButton && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="rounded-sm gap-2 flex items-center"
-                  variant="outline"
-                >
-                  <span>Сортировать</span>
-                  <ArrowDownWideNarrow size={18} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleSort("sortableNumber")}>
-                  <span className="flex items-center gap-2">
-                    По номеру {getSortIcon("sortableNumber")}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort("applicant")}>
-                  <span className="flex items-center gap-2">
-                    По заявителю {getSortIcon("applicant")}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort("urgency")}>
-                  <span className="flex items-center gap-2">
-                    По срочности {getSortIcon("urgency")}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSort("date")}>
-                  <span className="flex items-center gap-2">
-                    По дате {getSortIcon("date")}
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          {!showMoreButton && <FilterDropdown />}
         </div>
       </CardHeader>
       <CardContent>
