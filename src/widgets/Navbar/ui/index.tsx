@@ -1,37 +1,75 @@
 import { Link } from "react-router-dom";
 import { Button } from "@shared/ui/button";
-import { Sheet, SheetTrigger, SheetContent } from "@shared/ui/sheet"; // shadcn/ui
+import { Sheet, SheetTrigger, SheetContent } from "@shared/ui/sheet";
 import { Menu } from "lucide-react";
 import Logo from "@widgets/Navbar/assets/logo.svg";
 import { authStore } from "@features/auth/store/authStore";
 import { observer } from "mobx-react-lite";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@shared/ui/dialog";
+import { useState } from "react";
 
 export const Navbar = observer(() => {
-  // 👉 Здесь любая реальная проверка авторизации:
-  const { isAuthenticated, user, logout } = authStore; // например, стейт из redux, react-query, context
+  const { isAuthenticated, user } = authStore;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirmation(true);
+  };
+
+  const handleConfirmLogout = () => {
+    // Оберните вызов в стрелочную функцию
+    authStore.logout();
+    navigate("/");
+    setShowLogoutConfirmation(false);
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutConfirmation(false);
+  };
 
   const AuthMenu = () => (
     <nav className="flex flex-col gap-2 text-base">
       <Link
         to="/dashboard"
-        className="rounded-md px-4 py-2 hover:bg-gray-100 transition"
+        className={`rounded-md px-4 py-2 transition ${
+          location.pathname === "/dashboard"
+            ? "bg-blue-100 hover:bg-blue-200 font-medium"
+            : "hover:bg-gray-100"
+        }`}
       >
         Главная
       </Link>
       <Link
         to="/order-log"
-        className="rounded-md px-4 py-2 hover:bg-gray-100 transition"
+        className={`rounded-md px-4 py-2 transition ${
+          location.pathname === "/order-log"
+            ? "bg-blue-100 hover:bg-blue-200 font-medium"
+            : "hover:bg-gray-100"
+        }`}
       >
         Журнал заявок
       </Link>
       <Link
         to="/profile"
-        className="rounded-md px-4 py-2 hover:bg-gray-100 transition"
+        className={`rounded-md px-4 py-2 transition ${
+          location.pathname === "/profile"
+            ? "bg-blue-100 hover:bg-blue-200 font-medium"
+            : "hover:bg-gray-100"
+        }`}
       >
         Профиль
       </Link>
       <button
-        onClick={logout}
+        onClick={handleLogoutClick}
         className="text-left rounded-md px-4 py-2 hover:bg-gray-100 transition"
       >
         Выйти
@@ -94,6 +132,39 @@ export const Navbar = observer(() => {
           </div>
         </>
       )}
+
+      {/* Модальное окно подтверждения выхода - ВНЕ условного рендеринга */}
+      <Dialog
+        open={showLogoutConfirmation}
+        onOpenChange={setShowLogoutConfirmation}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Подтверждение выхода</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">Вы уверены?</p>
+          </div>
+          <DialogFooter className="flex gap-2 sm:justify-end">
+            <Button
+              className="w-full"
+              variant="outline"
+              color="grey"
+              onClick={handleCancelLogout}
+            >
+              Отмена
+            </Button>
+            <Button
+              className="w-full"
+              variant="destructive"
+              color="default"
+              onClick={handleConfirmLogout}
+            >
+              Выйти
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });

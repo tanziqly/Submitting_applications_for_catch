@@ -26,7 +26,7 @@ export const Home = () => {
         {/* Кнопка */}
         <div className="mt-8">
           <Link to="/application">
-            <Button variant="default" size="default" color="default">
+            <Button className="text-xl" variant="default" size="home" color="default">
               Подать заявку
               <ArrowRight className="w-5 h-5" />
             </Button>
