@@ -422,11 +422,6 @@ const handleFilteredData = (filteredRequests: any) => {
         <div className="flex items-center justify-between w-full">
           <CardTitle className="text-xl font-medium">
             {title}
-            {isFilterActive && (
-              <span className="text-sm text-gray-500 ml-2">
-                (отфильтровано: {filteredData.length})
-              </span>
-            )}
           </CardTitle>
           {!showMoreButton && (
             <FilterDropdown 
