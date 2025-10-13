@@ -9,13 +9,7 @@ import {
   TableCell,
 } from "@shared/ui/table";
 import { Button } from "@shared/ui/button";
-import { ArrowDownWideNarrow, ArrowUpDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@shared/ui/dropdown-menu";
+import { ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "@shared/api/axios";
 import FilterDropdown from "@shared/ui/filter";
@@ -39,6 +33,8 @@ interface TableRowData {
     name: string;
   };
   sortableNumber?: number;
+  created_at?: string; // Добавьте это поле
+  dogs_count?: number; // Добавьте это поле для совместимости с API
 }
 
 interface ApplicationsTableProps {
@@ -269,10 +265,74 @@ export const ApplicationsTable = ({
   const [sortField, setSortField] = useState<SortField>("sortableNumber");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [tableData, setTableData] = useState<TableRowData[]>(data);
+  const [filteredData, setFilteredData] = useState<TableRowData[]>(data);
+  const [isFilterActive, setIsFilterActive] = useState(false);
 
   useEffect(() => {
     setTableData(data);
+    setFilteredData(data);
+    setIsFilterActive(false);
   }, [data]);
+
+const handleFilteredData = (filteredRequests: any) => {
+  console.log("Данные от фильтра: ", filteredRequests);
+  
+  // Проверяем разные возможные форматы ответа
+  let requestsArray: any[] = [];
+  
+  if (filteredRequests && Array.isArray(filteredRequests)) {
+    // Если пришел массив напрямую (как из /requests)
+    requestsArray = filteredRequests;
+  } else if (filteredRequests && filteredRequests.data && Array.isArray(filteredRequests.data)) {
+    // Если пришел объект с полем data (как из /requests_otdel)
+    requestsArray = filteredRequests.data;
+  } else {
+    console.warn("Неизвестный формат данных:", filteredRequests);
+    requestsArray = [];
+  }
+  
+  console.log("Обработанный массив:", requestsArray);
+  
+  if (requestsArray.length === 0) {
+    setFilteredData([]);
+    setIsFilterActive(true);
+    return;
+  }
+
+  // Преобразуем данные в формат TableRowData
+  const transformedData: TableRowData[] = requestsArray.map((request, index) => ({
+    id: request.id,
+    number: request.number || `${index + 1}`,
+    applicant: request.applicant?.name || "Не указан",
+    urgency: request.urgency || "Не указана",
+    date: request.created_at
+      ? new Date(request.created_at).toLocaleDateString("ru-RU")
+      : "Не указана",
+    address: request.address || "Не указан",
+    dogsCount: request.dogs_count || 0,
+    behavior: request.behavior || "Не указано",
+    applicantName: request.applicant?.name || "Не указано",
+    contactPerson: request.contact_person || "Не указано",
+    status: request.status || "Не указан",
+    source: request.source || { id: "", name: "" },
+  }));
+
+  console.log("Преобразованные данные:", transformedData);
+  setFilteredData(transformedData);
+  setIsFilterActive(true);
+};
+
+  const handleFilterLoading = (loading: boolean) => {
+    // Можно добавить индикатор загрузки если нужно
+    console.log("Filter loading:", loading);
+  };
+
+  const handleFilterError = (error: string | null) => {
+    // Можно показать ошибку если нужно
+    if (error) {
+      console.error("Filter error:", error);
+    }
+  };
 
   const extractNumberFromString = (str: string): number => {
     if (!str) return 0;
@@ -280,12 +340,15 @@ export const ApplicationsTable = ({
     return numbers ? parseInt(numbers, 10) : 0;
   };
 
+  // Используем filteredData если фильтр активен, иначе tableData
+  const dataToProcess = isFilterActive ? filteredData : tableData;
+
   const processedData = useMemo(() => {
-    return tableData.map((item) => ({
+    return dataToProcess.map((item) => ({
       ...item,
       sortableNumber: extractNumberFromString(item.number),
     }));
-  }, [tableData]);
+  }, [dataToProcess]);
 
   const sortedData = useMemo(() => {
     const sorted = [...processedData].sort((a, b) => {
@@ -339,18 +402,39 @@ export const ApplicationsTable = ({
         item.id === id ? { ...item, status: newStatus } : item
       )
     );
+    // Также обновляем filteredData если фильтр активен
+    if (isFilterActive) {
+      setFilteredData((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, status: newStatus } : item
+        )
+      );
+    }
   };
 
   const selectedRow = selectedRowId
-    ? tableData.find((item) => item.id === selectedRowId)
+    ? dataToProcess.find((item) => item.id === selectedRowId)
     : undefined;
 
   return (
     <Card className="border-none w-full shadow-none">
       <CardHeader className="w-full">
         <div className="flex items-center justify-between w-full">
-          <CardTitle className="text-xl font-medium">{title}</CardTitle>
-          {!showMoreButton && <FilterDropdown />}
+          <CardTitle className="text-xl font-medium">
+            {title}
+            {isFilterActive && (
+              <span className="text-sm text-gray-500 ml-2">
+                (отфильтровано: {filteredData.length})
+              </span>
+            )}
+          </CardTitle>
+          {!showMoreButton && (
+            <FilterDropdown 
+              onFilteredData={handleFilteredData}
+              onLoading={handleFilterLoading}
+              onError={handleFilterError}
+            />
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -392,18 +476,26 @@ export const ApplicationsTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedData.map((row) => (
-              <TableRow
-                key={row.id}
-                className="cursor-pointer hover:bg-blue-50 transition"
-                onClick={() => handleRowClick(row)}
-              >
-                <TableCell className="text-center">{row.number}</TableCell>
-                <TableCell>{row.applicant}</TableCell>
-                <TableCell>{row.urgency}</TableCell>
-                <TableCell>{row.date}</TableCell>
+            {sortedData.length > 0 ? (
+              sortedData.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="cursor-pointer hover:bg-blue-50 transition"
+                  onClick={() => handleRowClick(row)}
+                >
+                  <TableCell className="text-center">{row.number}</TableCell>
+                  <TableCell>{row.applicant}</TableCell>
+                  <TableCell>{row.urgency}</TableCell>
+                  <TableCell>{row.date}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                  {isFilterActive ? "Нет данных по выбранному фильтру" : "Нет данных"}
+                </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
         {showMoreButton && (
