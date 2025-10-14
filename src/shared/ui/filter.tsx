@@ -55,14 +55,12 @@ export default function FilterDropdownInline({
   const [year, setYear] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  // Универсальная функция фильтрации
   const applyFilter = async (filters: { otdel_id?: string; year?: string } = {}) => {
     try {
       setLoading(true);
       onLoading?.(true);
       onError?.(null);
 
-      // Убираем пустые параметры
       const params = Object.fromEntries(
         Object.entries(filters).filter(([_, value]) => value && value !== "")
       );
@@ -86,41 +84,21 @@ export default function FilterDropdownInline({
     }
   };
 
-  // Функция применения фильтра теротдела
-  const handleApplyTerotdelFilter = async () => {
-    if (!terValue) {
-      onError?.("Выберите теротдел");
-      return;
+  const handleApplyFilter = async () => {
+    if (year) {
+      const yearNum = parseInt(year);
+      const currentYear = new Date().getFullYear();
+      if (yearNum < 2000 || yearNum > currentYear + 1) {
+        onError?.(`Введите корректный год (2000-${currentYear + 1})`);
+        return;
+      }
     }
 
     try {
       await applyFilter({ 
-        otdel_id: terValue,
+        otdel_id: terValue || undefined,
         year: year || undefined 
       });
-      setActive("none");
-    } catch (error) {
-      // Ошибка уже обработана в applyFilter
-    }
-  };
-
-  // Функция применения фильтра по году
-  const handleApplyYearFilter = async () => {
-    if (!year) {
-      onError?.("Введите год");
-      return;
-    }
-
-    // Проверяем валидность года
-    const yearNum = parseInt(year);
-    const currentYear = new Date().getFullYear();
-    if (yearNum < 2000 || yearNum > currentYear + 1) {
-      onError?.(`Введите корректный год (2000-${currentYear + 1})`);
-      return;
-    }
-
-    try {
-      await applyFilter({ year });
       setActive("none");
     } catch (error) {
       // Ошибка уже обработана в applyFilter
@@ -135,7 +113,6 @@ export default function FilterDropdownInline({
     
     try {
       onLoading?.(true);
-      // Получаем все данные без фильтров
       const response = await api.get("/requests");
       console.log("✅ Все заявки загружены:", response.data);
       onFilteredData?.(response.data);
@@ -168,7 +145,6 @@ export default function FilterDropdownInline({
           sideOffset={4}
           className="w-80 p-0 overflow-hidden shadow-lg border border-gray-200 rounded-xl"
         >
-          {/* Кнопки фильтров */}
           <div className="p-3 border-b bg-white">
             <div className="flex flex-col gap-2">
               <button
@@ -180,7 +156,7 @@ export default function FilterDropdownInline({
                     : "hover:bg-slate-50"
                 }`}
               >
-                Только теротдел
+                Теротдел
               </button>
 
               <button
@@ -192,7 +168,7 @@ export default function FilterDropdownInline({
                     : "hover:bg-slate-50"
                 }`}
               >
-                По году
+                Год
               </button>
 
               <button
@@ -205,7 +181,6 @@ export default function FilterDropdownInline({
             </div>
           </div>
 
-          {/* Раскрывающаяся форма */}
           <div
             className={`bg-white transition-[max-height,opacity,transform] duration-200 ease-in-out overflow-hidden text-[14px] ${
               active === "none"
@@ -213,10 +188,7 @@ export default function FilterDropdownInline({
                 : "max-h-[320px] opacity-100 translate-y-0"
             }`}
           >
-            {/* Теротдел */}
-            <div
-              className={`${active === "terotdel" ? "block" : "hidden"} p-4`}
-            >
+            <div className={`${active === "terotdel" ? "block" : "hidden"} p-4`}>
               <h4 className="text-lg font-semibold mb-2">Выбрать теротдел</h4>
               <Select value={terValue} onValueChange={(v) => setTerValue(v)}>
                 <SelectTrigger className="w-full">
@@ -231,25 +203,10 @@ export default function FilterDropdownInline({
                 </SelectContent>
               </Select>
 
-              {/* Поле года для комбинированного фильтра */}
-              <div className="mt-3">
-                <label className="text-sm font-medium mb-1 block">
-                  Год (опционально)
-                </label>
-                <Input
-                  type="number"
-                  placeholder="Введите год"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  min="2000"
-                  max={new Date().getFullYear() + 1}
-                />
-              </div>
-
               <div className="mt-4 text-center">
                 <Button 
                   className="bg-blue-600 text-white w-full"
-                  onClick={handleApplyTerotdelFilter}
+                  onClick={handleApplyFilter}
                   disabled={loading || !terValue}
                 >
                   {loading ? "Загрузка..." : "Применить"}
@@ -257,7 +214,6 @@ export default function FilterDropdownInline({
               </div>
             </div>
 
-            {/* По году */}
             <div className={`${active === "year" ? "block" : "hidden"} p-4`}>
               <h4 className="text-lg font-semibold mb-2">По году</h4>
 
@@ -274,7 +230,7 @@ export default function FilterDropdownInline({
               <div className="mt-4 text-center">
                 <Button 
                   className="bg-blue-600 text-white w-full"
-                  onClick={handleApplyYearFilter}
+                  onClick={handleApplyFilter}
                   disabled={loading || !year}
                 >
                   {loading ? "Загрузка..." : "Применить"}
