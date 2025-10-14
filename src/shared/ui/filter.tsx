@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -52,30 +52,31 @@ export default function FilterDropdownInline({
 }: FilterDropdownInlineProps) {
   const [active, setActive] = useState<FilterKind>("none");
   const [terValue, setTerValue] = useState<string>("");
-  const [yearFrom, setYearFrom] = useState<string>("");
-  const [yearTo, setYearTo] = useState<string>("");
+  const [year, setYear] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  // Функция для получения данных по теротделу
-  const getRequestsByOtdel = async (otdelId: string): Promise<Request[]> => {
+  // Универсальная функция фильтрации
+  const applyFilter = async (filters: { otdel_id?: string; year?: string } = {}) => {
     try {
       setLoading(true);
       onLoading?.(true);
       onError?.(null);
 
-      const response = await api.get("/requests_otdel", {
-        params: {
-          otdel_id: otdelId,
-        },
-      });
+      // Убираем пустые параметры
+      const params = Object.fromEntries(
+        Object.entries(filters).filter(([_, value]) => value && value !== "")
+      );
 
-      console.log("Данные по теротделу:", response.data);
+      console.log("Фильтры:", params);
+
+      const response = await api.get("/requests_otdel", { params });
+      console.log("Отфильтрованные данные:", response.data);
       
       const data = response.data as Request[];
       onFilteredData?.(data);
       return data;
     } catch (error: any) {
-      console.error("Ошибка при получении данных по теротделу:", error);
+      console.error("Ошибка при фильтрации:", error);
       const errorMessage = error.response?.data?.message || "Ошибка при загрузке данных";
       onError?.(errorMessage);
       throw error;
@@ -93,40 +94,59 @@ export default function FilterDropdownInline({
     }
 
     try {
-      await getRequestsByOtdel(terValue);
-      setActive("none"); // Закрываем dropdown после применения
+      await applyFilter({ 
+        otdel_id: terValue,
+        year: year || undefined 
+      });
+      setActive("none");
     } catch (error) {
-      // Ошибка уже обработана в getRequestsByOtdel
+      // Ошибка уже обработана в applyFilter
+    }
+  };
+
+  // Функция применения фильтра по году
+  const handleApplyYearFilter = async () => {
+    if (!year) {
+      onError?.("Введите год");
+      return;
+    }
+
+    // Проверяем валидность года
+    const yearNum = parseInt(year);
+    const currentYear = new Date().getFullYear();
+    if (yearNum < 2000 || yearNum > currentYear + 1) {
+      onError?.(`Введите корректный год (2000-${currentYear + 1})`);
+      return;
+    }
+
+    try {
+      await applyFilter({ year });
+      setActive("none");
+    } catch (error) {
+      // Ошибка уже обработана в applyFilter
     }
   };
 
   const handleResetFilters = async () => {
-  setTerValue("");
-  setYearFrom("");
-  setYearTo("");
-  setActive("none");
-  onError?.(null);
-  
-  try {
-    onLoading?.(true);
+    setTerValue("");
+    setYear("");
+    setActive("none");
+    onError?.(null);
     
-    // Получаем все заявки с сервера
-    const response = await api.get("/requests");
-    
-    console.log("✅ Все заявки загружены:", response.data);
-    
-    // Важно: передаем данные как есть, без преобразования
-    // response.data уже является массивом заявок
-    onFilteredData?.(response.data);
-    
-  } catch (error: any) {
-    console.error("❌ Ошибка при загрузке всех заявок:", error);
-    onError?.("Не удалось загрузить список заявок");
-    onFilteredData?.([]);
-  } finally {
-    onLoading?.(false);
-  }
-};
+    try {
+      onLoading?.(true);
+      // Получаем все данные без фильтров
+      const response = await api.get("/requests");
+      console.log("✅ Все заявки загружены:", response.data);
+      onFilteredData?.(response.data);
+    } catch (error: any) {
+      console.error("❌ Ошибка при загрузке всех заявок:", error);
+      onError?.("Не удалось загрузить список заявок");
+      onFilteredData?.([]);
+    } finally {
+      onLoading?.(false);
+    }
+  };
 
   function toggle(kind: FilterKind) {
     setActive((prev) => (prev === kind ? "none" : kind));
@@ -175,7 +195,6 @@ export default function FilterDropdownInline({
                 По году
               </button>
 
-              {/* Кнопка сброса фильтров */}
               <button
                 type="button"
                 onClick={handleResetFilters}
@@ -212,6 +231,21 @@ export default function FilterDropdownInline({
                 </SelectContent>
               </Select>
 
+              {/* Поле года для комбинированного фильтра */}
+              <div className="mt-3">
+                <label className="text-sm font-medium mb-1 block">
+                  Год (опционально)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="Введите год"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  min="2000"
+                  max={new Date().getFullYear() + 1}
+                />
+              </div>
+
               <div className="mt-4 text-center">
                 <Button 
                   className="bg-blue-600 text-white w-full"
@@ -227,27 +261,23 @@ export default function FilterDropdownInline({
             <div className={`${active === "year" ? "block" : "hidden"} p-4`}>
               <h4 className="text-lg font-semibold mb-2">По году</h4>
 
-              <label className="text-sm text-gray-600">От</label>
               <Input
                 type="number"
                 placeholder="Введите год"
-                value={yearFrom}
-                onChange={(e) => setYearFrom(e.target.value)}
-                className="mt-1"
-              />
-
-              <label className="text-sm text-gray-600 mt-3 block">До</label>
-              <Input
-                type="number"
-                placeholder="Введите год"
-                value={yearTo}
-                onChange={(e) => setYearTo(e.target.value)}
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                min="2000"
+                max={new Date().getFullYear() + 1}
                 className="mt-1"
               />
 
               <div className="mt-4 text-center">
-                <Button className="bg-blue-600 text-white w-full">
-                  Применить
+                <Button 
+                  className="bg-blue-600 text-white w-full"
+                  onClick={handleApplyYearFilter}
+                  disabled={loading || !year}
+                >
+                  {loading ? "Загрузка..." : "Применить"}
                 </Button>
               </div>
             </div>

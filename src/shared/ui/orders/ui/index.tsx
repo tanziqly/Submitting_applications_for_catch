@@ -13,6 +13,7 @@ import { ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "@shared/api/axios";
 import FilterDropdown from "@shared/ui/filter";
+import { authStore } from "@features/auth";
 
 interface TableRowData {
   id: number | string;
@@ -416,6 +417,8 @@ const handleFilteredData = (filteredRequests: any) => {
     ? dataToProcess.find((item) => item.id === selectedRowId)
     : undefined;
 
+  const { user } = authStore
+
   return (
     <Card className="border-none w-full shadow-none">
       <CardHeader className="w-full">
@@ -423,13 +426,13 @@ const handleFilteredData = (filteredRequests: any) => {
           <CardTitle className="text-xl font-medium">
             {title}
           </CardTitle>
-          {!showMoreButton && (
-            <FilterDropdown 
-              onFilteredData={handleFilteredData}
-              onLoading={handleFilterLoading}
-              onError={handleFilterError}
-            />
-          )}
+          {!showMoreButton && user?.login === "ryaon_comm" && (
+          <FilterDropdown 
+            onFilteredData={handleFilteredData}
+            onLoading={handleFilterLoading}
+            onError={handleFilterError}
+          />
+        )}
         </div>
       </CardHeader>
       <CardContent>
