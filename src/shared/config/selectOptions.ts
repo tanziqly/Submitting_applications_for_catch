@@ -1,4 +1,4 @@
-export const ApplicantOptions = [
+export const SourceOptions = [
   {
     label: "Глава администрации Ивовского сельсовета",
     value: "02bd63c0-e59e-4f3e-8b1c-b9d572e1e604",
@@ -85,7 +85,7 @@ export const ApplicantOptions = [
   },
 ];
 
-export const SourceOptions = [
+export const ApplicantOptions = [
   {
     label: "Тележенский территориальный отдел",
     value: "29956efe-0f1f-4c07-9582-e371950a55b1",

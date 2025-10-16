@@ -208,12 +208,12 @@ const OrderModal: React.FC<OrderModalProps> = ({
                 <b>Срочность:</b> {localData.urgency}
               </div>
               <div>
-                <b>Имя заявителя:</b>{" "}
-                {localData.applicantName || localData.applicant}
+                <b>Заявитель:</b>{" "}
+                {localData.source?.name || localData.applicantInfo || "-"}
               </div>
               <div>
                 <b>Сведения о заявителе:</b>{" "}
-                {localData.source?.name || localData.applicantInfo || "-"}
+                {localData.applicantName || localData.applicant}
               </div>
               <div>
                 <b>Контактное лицо:</b> {localData.contactPerson || "-"}

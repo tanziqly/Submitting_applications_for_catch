@@ -30,13 +30,13 @@ export const useDashboardData = () => {
     const stats: DashboardStats = {
       total: data.length,
       new: data.filter(
-        (request) => request.status === "новая"
+        (request) => request.status === "Новая"
       ).length,
       inProgress: data.filter(
-        (request) => request.status === "в работе"
+        (request) => request.status === "В работе"
       ).length,
       completed: data.filter(
-        (request) => request.status === "выполнена"
+        (request) => request.status === "Выполнена"
       ).length,
     };
     setStats(stats);
