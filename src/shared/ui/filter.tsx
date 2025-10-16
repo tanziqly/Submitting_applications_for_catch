@@ -67,7 +67,7 @@ export default function FilterDropdownInline({
 
       console.log("Фильтры:", params);
 
-      const response = await api.get("/requests_otdel", { params });
+      const response = await api.get("/requests", { params });
       console.log("Отфильтрованные данные:", response.data);
       
       const data = response.data as Request[];

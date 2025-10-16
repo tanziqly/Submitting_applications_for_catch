@@ -176,7 +176,7 @@ export const Application = () => {
             </Label>
             <Select
               placeholder="Выберите заявителя"
-              items={ApplicantOptions}
+              items={SourceOptions}
               value={formData.applicant.id || ""}
               onValueChange={handleSelectChange("applicant")}
               disabled={loading}
@@ -187,7 +187,7 @@ export const Application = () => {
             </Label>
             <Select
               placeholder="Выберите сведения о заявителе"
-              items={SourceOptions}
+              items={ApplicantOptions}
               value={formData.source.id || ""}
               onValueChange={handleSelectChange("source")}
               disabled={loading}
