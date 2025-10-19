@@ -186,24 +186,6 @@ export const ApplicationsTable = ({
     }
   };
 
-  // Функция для определения цвета текста статуса (опционально)
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case "Выполнена":
-        return "text-green-600";
-      case "Отменена":
-        return "text-gray-600";
-      case "Просрочена":
-        return "text-red-600";
-      case "Новая":
-        return "text-blue-600";
-      case "В работе":
-        return "text-orange-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
   return (
     <Card className="border-none w-full shadow-none">
       <CardHeader className="w-full">
