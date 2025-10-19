@@ -10,9 +10,13 @@ export const changeRequestStatus = async (
   return response.data;
 };
 
-export const getDocumentUrl = async (requestNumber: string): Promise<string> => {
+// Функция для получения акта НА отлов (документ для работы)
+export const getCatchActDocument = async (requestNumber: string, requestYear: string): Promise<string> => {
   const response = await api.get("/requests/download_request", {
-    params: { number: requestNumber },
+    params: { 
+      number: requestNumber,
+      year: requestYear 
+    },
     validateStatus: (status) => status < 500,
   });
 
@@ -25,12 +29,13 @@ export const getDocumentUrl = async (requestNumber: string): Promise<string> => 
   }
 };
 
-export const getDocumentReadyUrl = async (requestNumber: string, requestYear: string): Promise<string> => {
-  const response = await api.get("/requests/download_request", {
+// Функция для получения готового акта отлова (выполненная работа)
+export const getCompletedActDocument = async (requestNumber: string, requestYear: string): Promise<string> => {
+  const response = await api.get("/requests/download_act", {
     params: { 
-        number: requestNumber,
-        year: requestYear
-     },
+      number: requestNumber,
+      year: requestYear
+    },
     validateStatus: (status) => status < 500,
   });
 

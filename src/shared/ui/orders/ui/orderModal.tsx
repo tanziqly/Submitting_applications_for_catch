@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@shared/ui/button";
 import { Upload, Download, FileText } from "lucide-react";
 import type { TableRowData, OrderModalProps } from "./types";
-import { changeRequestStatus, getDocumentUrl, getDocumentReadyUrl } from "./api";
+import { changeRequestStatus, getCatchActDocument, getCompletedActDocument } from "./api";
 import { authStore } from "@features/auth";
 
 export const OrderModal: React.FC<OrderModalProps> = ({
@@ -48,28 +48,8 @@ export const OrderModal: React.FC<OrderModalProps> = ({
     }
   };
 
-  const handleGetDocument = async () => {
-    if (!localData?.number) {
-      setDocumentError("Номер заявки не указан");
-      return;
-    }
-
-    setLoading(true);
-    setDocumentError(null);
-
-    try {
-      const url = await getDocumentUrl(localData.number);
-      window.open(url, "_blank");
-      setTimeout(() => onClose(), 1000);
-    } catch (error: any) {
-      console.error("Ошибка при получении документа:", error);
-      setDocumentError(error.message || "Ошибка при получении документа");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGetReadyDocument = async () => {
+  // Функция для получения акта НА отлов (для работы)
+  const handleGetCatchAct = async () => {
     if (!localData?.number) {
       setDocumentError("Номер заявки не указан");
       return;
@@ -82,12 +62,37 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       // Извлекаем год из даты заявки
       const requestYear = localData.date ? new Date(localData.date.split('.').reverse().join('-')).getFullYear().toString() : new Date().getFullYear().toString();
       
-      const url = await getDocumentReadyUrl(localData.number, requestYear);
+      const url = await getCatchActDocument(localData.number, requestYear);
       window.open(url, "_blank");
       setTimeout(() => onClose(), 1000);
     } catch (error: any) {
-      console.error("Ошибка при получении готового документа:", error);
-      setDocumentError(error.message || "Ошибка при получении готового документа");
+      console.error("Ошибка при получении акта на отлов:", error);
+      setDocumentError(error.message || "Ошибка при получении акта на отлов");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Функция для получения готового акта отлова (выполненной работы)
+  const handleGetCompletedAct = async () => {
+    if (!localData?.number) {
+      setDocumentError("Номер заявки не указан");
+      return;
+    }
+
+    setLoading(true);
+    setDocumentError(null);
+
+    try {
+      // Извлекаем год из даты заявки
+      const requestYear = localData.date ? new Date(localData.date.split('.').reverse().join('-')).getFullYear().toString() : new Date().getFullYear().toString();
+      
+      const url = await getCompletedActDocument(localData.number, requestYear);
+      window.open(url, "_blank");
+      setTimeout(() => onClose(), 1000);
+    } catch (error: any) {
+      console.error("Ошибка при получении готового акта отлова:", error);
+      setDocumentError(error.message || "Ошибка при получении готового акта отлова");
     } finally {
       setLoading(false);
     }
@@ -136,7 +141,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
             <div className="text-sm font-medium mb-2">
               Выберите новый статус:
             </div>
-            {["Новая", "В работе", "Выполнена", "Отменена"].map((status) => (
+            {["Новая", "В работе", "Отменена"].map((status) => (
               <Button
                 key={status}
                 variant="outline"
@@ -190,13 +195,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
             
             <div className="flex flex-col gap-2">
               {isCompleted ? (
-                // Если статус "Выполнена" - показываем только кнопку "Готовый документ"
+                // Если статус "Выполнена" - показываем кнопку для скачивания готового акта
                 <>
-                  
                   <Button
-                    variant="outline"
-                    className="bg-green-50 hover:bg-green-100 border-green-200 text-green-700 flex-1"
-                    onClick={handleGetReadyDocument}
+                    variant="cube"
+                    onClick={handleGetCompletedAct}
                     disabled={loading}
                   >
                     <FileText size={16} className="mr-2" />
@@ -241,17 +244,16 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               ) : (
                 // Если статус НЕ "Выполнена" и НЕ "Отменена" - показываем все кнопки
                 <>
-                  
                   <Button
                     variant="cube"
-                    onClick={handleGetDocument}
+                    onClick={handleGetCatchAct}
                     disabled={loading}
                   >
                     <Download size={16} className="mr-2" />
                     {loading ? "Загрузка..." : "Получить акт на отлов"}
                   </Button>
                   
-                  {/* Показываем кнопку "Загрузить акт отлова" только если пользователь ryaon_comm */}
+                  {/* Показываем кнопку "Загрузить акт отлова" только если пользователь ryaon_comm или podryadchik */}
                   {(user?.login === "ryaon_comm" || user?.login === "podryadchik") && (
                     <Button
                       variant="outline"
@@ -262,6 +264,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                       Загрузить акт отлова
                     </Button>
                   )}
+                  
                   <Button
                     variant="cube"
                     color="grey"

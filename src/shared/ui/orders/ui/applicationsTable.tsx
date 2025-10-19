@@ -193,7 +193,7 @@ export const ApplicationsTable = ({
           <CardTitle className="text-xl font-medium">
             {title}
           </CardTitle>
-          {!showMoreButton && user?.login === "ryaon_comm" && (
+          {(!showMoreButton && user?.login === "ryaon_comm" || !showMoreButton && user?.login === "podryadchik") && (
             <FilterDropdown 
               onFilteredData={handleFilteredData}
               onLoading={handleFilterLoading}
