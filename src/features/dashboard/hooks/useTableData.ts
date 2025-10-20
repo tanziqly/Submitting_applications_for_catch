@@ -20,7 +20,7 @@ export interface TableRowData {
 export const useTableData = (requests: Request[]) => {
   const tableData = requests.slice(0, 5).map((request, index) => ({
     id: request.id,
-    number: `${index + 1}`,
+    number: request.number,
     applicant: request.applicant?.name || "Не указан",
     urgency: request.urgency || "Не указана",
     date: request.created_at
