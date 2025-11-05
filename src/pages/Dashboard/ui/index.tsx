@@ -121,6 +121,7 @@ export const DashboardPage = () => {
             data={tableData}
             showMoreButton={true}
             maxVisibleRows={10}
+            hideCheckboxes={true} 
           />
         </div>
       </main>

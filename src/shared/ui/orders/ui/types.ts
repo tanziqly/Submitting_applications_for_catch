@@ -28,6 +28,7 @@ export interface ApplicationsTableProps {
   data: TableRowData[];
   showMoreButton?: boolean;
   maxVisibleRows?: number;
+  hideCheckboxes?: boolean; // ← Добавьте это
 }
 
 export interface OrderModalProps {

@@ -29,6 +29,7 @@ export const ApplicationsTable = ({
   data,
   showMoreButton = false,
   maxVisibleRows,
+  hideCheckboxes = false,
 }: ApplicationsTableProps) => {
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -75,11 +76,17 @@ export const ApplicationsTable = ({
     }));
   }, [dataToProcess]);
 
-  // Данные для отображения - всегда сортируем, но учитываем фильтрацию
+  // Данные для отображения - сортируем только когда активны фильтры
   const displayData = useMemo(() => {
-    const dataToSort = isFilterActive ? filteredData : tableData;
+    const dataToDisplay = isFilterActive ? filteredData : tableData;
     
-    const processed = dataToSort.map((item) => ({
+    // Если фильтры не активны - возвращаем данные как есть с сервера
+    if (!isFilterActive) {
+      return maxVisibleRows ? dataToDisplay.slice(0, maxVisibleRows) : dataToDisplay;
+    }
+    
+    // Если фильтры активны - применяем сортировку
+    const processed = dataToDisplay.map((item) => ({
       ...item,
       sortableNumber: extractNumberFromString(item.number),
     }));
@@ -142,6 +149,9 @@ export const ApplicationsTable = ({
   };
 
   const handleSort = (field: SortField) => {
+    // Сортировка работает только когда активны фильтры
+    if (!isFilterActive) return;
+    
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -151,6 +161,9 @@ export const ApplicationsTable = ({
   };
 
   const getSortIcon = (field: SortField) => {
+    // Иконки сортировки показываем только когда активны фильтры
+    if (!isFilterActive) return null;
+    
     if (sortField !== field) return <ArrowUpDown size={16} />;
     return sortDirection === "asc" ? (
       <span className="text-sm">↑</span>
@@ -224,6 +237,9 @@ export const ApplicationsTable = ({
   const isAllSelected = displayData.length > 0 && selectedRows.length === displayData.length;
   const isSomeSelected = selectedRows.length > 0 && selectedRows.length < displayData.length;
 
+  // Определяем количество колонок для colSpan
+  const columnsCount = hideCheckboxes ? 4 : 5;
+
   return (
     <Card className="border-none w-full shadow-none">
       <CardHeader className="w-full">
@@ -264,19 +280,22 @@ export const ApplicationsTable = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-[#CADDFF]">
-              <TableHead className="text-center text-[#6C6C6E] w-12">
-                <input
-                  type="checkbox"
-                  checked={isAllSelected}
-                  ref={input => {
-                    if (input) {
-                      input.indeterminate = isSomeSelected;
-                    }
-                  }}
-                  onChange={handleSelectAll}
-                  className="w-4 h-4"
-                />
-              </TableHead>
+              {/* Колонка с чекбоксами - показывается только если hideCheckboxes = false */}
+              {!hideCheckboxes && (
+                <TableHead className="text-center text-[#6C6C6E] w-12">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    ref={input => {
+                      if (input) {
+                        input.indeterminate = isSomeSelected;
+                      }
+                    }}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4"
+                  />
+                </TableHead>
+              )}
               <TableHead
                 className="text-center text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
                 onClick={() => handleSort("sortableNumber")}
@@ -319,15 +338,18 @@ export const ApplicationsTable = ({
                   className={getRowClassName(row.status)}
                   onClick={() => handleRowClick(row)}
                 >
-                  <TableCell className="text-center w-12">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(row.id)}
-                      onChange={(e) => e.stopPropagation()}
-                      onClick={(e) => handleRowSelect(row.id, e)}
-                      className="w-4 h-4"
-                    />
-                  </TableCell>
+                  {/* Чекбокс в строке - показывается только если hideCheckboxes = false */}
+                  {!hideCheckboxes && (
+                    <TableCell className="text-center w-12">
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(row.id)}
+                        onChange={(e) => e.stopPropagation()}
+                        onClick={(e) => handleRowSelect(row.id, e)}
+                        className="w-4 h-4"
+                      />
+                    </TableCell>
+                  )}
                   <TableCell className="text-center">{row.number}</TableCell>
                   <TableCell>{row.applicant}</TableCell>
                   <TableCell>{row.urgency}</TableCell>
@@ -336,7 +358,7 @@ export const ApplicationsTable = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={columnsCount} className="text-center py-8 text-gray-500">
                   {isFilterActive ? "Нет данных по выбранному фильтру" : "Нет данных"}
                 </TableCell>
               </TableRow>
