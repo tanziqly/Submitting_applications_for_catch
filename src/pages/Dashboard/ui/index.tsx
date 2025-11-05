@@ -120,7 +120,7 @@ export const DashboardPage = () => {
             title="Последние заявки"
             data={tableData}
             showMoreButton={true}
-            maxVisibleRows={5}
+            maxVisibleRows={10}
           />
         </div>
       </main>

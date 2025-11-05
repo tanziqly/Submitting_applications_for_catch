@@ -1,5 +1,3 @@
-// shared/ui/orders/ui/ApplicationsTable.tsx
-
 import { useState, useMemo, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@shared/ui/card";
 import {
@@ -23,6 +21,8 @@ import type {
   SortDirection,
 } from "./types";
 import { extractNumberFromString, transformFilteredData } from "./utils";
+import FilterDropdownInline from "@shared/ui/multiRequest";
+import { MultiRequestByIdsButton } from "@shared/ui/multiRequestByIds";
 
 export const ApplicationsTable = ({
   title,
@@ -39,11 +39,13 @@ export const ApplicationsTable = ({
   const [tableData, setTableData] = useState<TableRowData[]>(data);
   const [filteredData, setFilteredData] = useState<TableRowData[]>(data);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [selectedRows, setSelectedRows] = useState<(string | number)[]>([]);
 
   useEffect(() => {
     setTableData(data);
     setFilteredData(data);
     setIsFilterActive(false);
+    setSelectedRows([]);
   }, [data]);
 
   const handleFilteredData = (filteredRequests: any) => {
@@ -51,6 +53,7 @@ export const ApplicationsTable = ({
     console.log("Преобразованные данные:", transformedData);
     setFilteredData(transformedData);
     setIsFilterActive(true);
+    setSelectedRows([]);
   };
 
   const handleFilterLoading = (loading: boolean) => {
@@ -72,8 +75,16 @@ export const ApplicationsTable = ({
     }));
   }, [dataToProcess]);
 
-  const sortedData = useMemo(() => {
-    const sorted = [...processedData].sort((a, b) => {
+  // Данные для отображения - всегда сортируем, но учитываем фильтрацию
+  const displayData = useMemo(() => {
+    const dataToSort = isFilterActive ? filteredData : tableData;
+    
+    const processed = dataToSort.map((item) => ({
+      ...item,
+      sortableNumber: extractNumberFromString(item.number),
+    }));
+
+    const sorted = [...processed].sort((a, b) => {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
 
@@ -93,7 +104,17 @@ export const ApplicationsTable = ({
     });
 
     return maxVisibleRows ? sorted.slice(0, maxVisibleRows) : sorted;
-  }, [processedData, sortField, sortDirection, maxVisibleRows]);
+  }, [tableData, filteredData, isFilterActive, sortField, sortDirection, maxVisibleRows]);
+
+  const handleDownloadSuccess = (url: string, count: number) => {
+    console.log(`Успешно сгенерировано ${count} заявок:`, url);
+    // Можно добавить дополнительную логику после успешного скачивания
+  };
+
+  const handleDownloadError = (error: string) => {
+    console.error("Ошибка при скачивании:", error);
+    // Можно показать уведомление об ошибке
+  };
 
   const handleRowClick = (row: TableRowData) => {
     setSelectedRowId(row.id);
@@ -104,8 +125,7 @@ export const ApplicationsTable = ({
   const handleOpenUploadModal = (requestData: TableRowData) => {
     console.log("handleOpenUploadModal вызван с данными:", requestData);
     setSelectedRequestData(requestData);
-    setOrderModalOpen(false); // Сначала закрываем модальное окно заявки
-    // Используем setTimeout чтобы дать время на закрытие первого модального окна
+    setOrderModalOpen(false);
     setTimeout(() => {
       setUploadModalOpen(true);
     }, 100);
@@ -156,7 +176,6 @@ export const ApplicationsTable = ({
 
   const handleUploadSuccess = () => {
     console.log("Акт успешно загружен");
-    // Можно обновить данные таблицы или показать уведомление
     if (selectedRequestData) {
       updateStatus(selectedRequestData.id, "Выполнена");
     }
@@ -168,7 +187,6 @@ export const ApplicationsTable = ({
 
   const { user } = authStore;
 
-  // Функция для определения класса строки в зависимости от статуса
   const getRowClassName = (status?: string) => {
     const baseClass = "cursor-pointer transition";
     
@@ -186,6 +204,26 @@ export const ApplicationsTable = ({
     }
   };
 
+  const handleRowSelect = (rowId: string | number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedRows(prev => 
+      prev.includes(rowId) 
+        ? prev.filter(id => id !== rowId)
+        : [...prev, rowId]
+    );
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedRows(displayData.map(row => row.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const isAllSelected = displayData.length > 0 && selectedRows.length === displayData.length;
+  const isSomeSelected = selectedRows.length > 0 && selectedRows.length < displayData.length;
+
   return (
     <Card className="border-none w-full shadow-none">
       <CardHeader className="w-full">
@@ -193,19 +231,52 @@ export const ApplicationsTable = ({
           <CardTitle className="text-xl font-medium">
             {title}
           </CardTitle>
-          {(!showMoreButton && user?.login === "ryaon_comm" || !showMoreButton && user?.login === "podryadchik") && (
-            <FilterDropdown 
-              onFilteredData={handleFilteredData}
-              onLoading={handleFilterLoading}
-              onError={handleFilterError}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            {/* Все кнопки доступны только для ryaon_comm и podryadchik */}
+            {(user?.login === "ryaon_comm" || user?.login === "podryadchik") && (
+              <>
+                {/* Кнопка скачивания выбранных заявок */}
+                {selectedRows.length > 0 && (
+                  <MultiRequestByIdsButton
+                    selectedIds={selectedRows}
+                    onSuccess={handleDownloadSuccess}
+                    onError={handleDownloadError}
+                  />
+                )}
+                
+                {/* Фильтры - показываются только когда нет выбранных заявок и !showMoreButton */}
+                {selectedRows.length === 0 && !showMoreButton && (
+                  <div className="flex gap-2">
+                    <FilterDropdownInline />
+                    <FilterDropdown 
+                      onFilteredData={handleFilteredData}
+                      onLoading={handleFilterLoading}
+                      onError={handleFilterError}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow className="bg-[#CADDFF]">
+              <TableHead className="text-center text-[#6C6C6E] w-12">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  ref={input => {
+                    if (input) {
+                      input.indeterminate = isSomeSelected;
+                    }
+                  }}
+                  onChange={handleSelectAll}
+                  className="w-4 h-4"
+                />
+              </TableHead>
               <TableHead
                 className="text-center text-[#6C6C6E] cursor-pointer hover:bg-blue-200 transition"
                 onClick={() => handleSort("sortableNumber")}
@@ -241,13 +312,22 @@ export const ApplicationsTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedData.length > 0 ? (
-              sortedData.map((row) => (
+            {displayData.length > 0 ? (
+              displayData.map((row) => (
                 <TableRow
                   key={row.id}
                   className={getRowClassName(row.status)}
                   onClick={() => handleRowClick(row)}
                 >
+                  <TableCell className="text-center w-12">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(row.id)}
+                      onChange={(e) => e.stopPropagation()}
+                      onClick={(e) => handleRowSelect(row.id, e)}
+                      className="w-4 h-4"
+                    />
+                  </TableCell>
                   <TableCell className="text-center">{row.number}</TableCell>
                   <TableCell>{row.applicant}</TableCell>
                   <TableCell>{row.urgency}</TableCell>
@@ -256,7 +336,7 @@ export const ApplicationsTable = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                   {isFilterActive ? "Нет данных по выбранному фильтру" : "Нет данных"}
                 </TableCell>
               </TableRow>

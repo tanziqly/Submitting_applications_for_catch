@@ -100,15 +100,6 @@ export const Navbar = observer(() => {
               Войти
             </Button>
           </Link>
-          <Link to="/application">
-            <Button
-              variant="default"
-              className="py-1 px-3 sm:py-2 sm:px-4"
-              size="default"
-            >
-              Подать заявку
-            </Button>
-          </Link>
         </div>
       ) : (
         // 👉 гамбургер-меню
@@ -130,6 +121,15 @@ export const Navbar = observer(() => {
               </span>
             </div>
           </div>
+          <Link to="/application">
+            <Button
+              variant="default"
+              className="py-1 px-3 sm:py-2 sm:px-4"
+              size="default"
+            >
+              Подать заявку
+            </Button>
+          </Link>
         </>
       )}
 

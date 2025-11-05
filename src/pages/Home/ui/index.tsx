@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
-import { Button } from "@shared/ui/button";
+
 import { RefreshCcwDot } from "lucide-react";
 import { File } from "lucide-react";
-import { CircleCheck, ArrowRight } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 
 export const Home = () => {
   return (
@@ -24,14 +23,6 @@ export const Home = () => {
         </p>
 
         {/* Кнопка */}
-        <div className="mt-8">
-          <Link to="/application">
-            <Button className="text-xl" variant="default" size="home" color="default">
-              Подать заявку
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
         <div className="flex items-center flex-col mt-4 md:mt-20 sm:mt-10">
           <span className="font-bold sm:text-xl text-[#65819F]">
             Как это работает:
