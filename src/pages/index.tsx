@@ -1,11 +1,7 @@
+// src/app/Router.tsx
+
 import type { FC } from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  // useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { ROUTE_CONSTANTS } from "@shared/config/routes";
 import { Application } from "@pages/Application";
@@ -18,26 +14,7 @@ import { DashboardPage } from "./Dashboard/ui";
 import { OrderLog } from "./OrderLog";
 import { Profile } from "./Profile";
 
-// const ProtectedRoute: FC<{ children: ReactNode }> = observer(({ children }) => {
-//   const location = useLocation();
-
-//   if (!authStore.isAuthChecked) {
-//     return <Loader />;
-//   }
-
-//   if (!authStore.isAuthenticated) {
-//     // Сохраняем информацию о том, куда перенаправлять после авторизации
-//     return (
-//       <Navigate
-//         to={ROUTE_CONSTANTS.SIGNIN}
-//         state={{ from: location }}
-//         replace
-//       />
-//     );
-//   }
-
-//   return <>{children}</>;
-// });
+import { ProtectedRoute } from "@shared/config/protectedRoutes";
 
 export const Router: FC = () => {
   return (
@@ -46,16 +23,47 @@ export const Router: FC = () => {
         <Routes>
           {/* Публичные маршруты */}
           <Route path={ROUTE_CONSTANTS.SIGNIN} element={<SignIn />} />
-          {/* Защищенные маршруты */}
+
+          {/* Защищенный маршрут: Profile, Application, Dashboard, OrderLog */}
+          <Route
+            path={ROUTE_CONSTANTS.PROFILE}
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTE_CONSTANTS.APPLICATION}
+            element={
+              <ProtectedRoute>
+                <Application />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTE_CONSTANTS.DASHBOARD}
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTE_CONSTANTS.ORDER_LOG}
+            element={
+              <ProtectedRoute>
+                <OrderLog />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Остальные маршруты */}
           <Route path={ROUTE_CONSTANTS.HOME} element={<Home />} />
-          <Route path={ROUTE_CONSTANTS.APPLICATION} element={<Application />} />
-          {/* Открытые маршруты */}
           <Route path={ROUTE_CONSTANTS.NOTFOUND} element={<NotFound />} />
           <Route path={ROUTE_CONSTANTS.SERVERERROR} element={<ServerError />} />
-          <Route path={ROUTE_CONSTANTS.DASHBOARD} element={<DashboardPage />} />
-          <Route path={ROUTE_CONSTANTS.ORDER_LOG} element={<OrderLog />} />
-          <Route path={ROUTE_CONSTANTS.PROFILE} element={<Profile />} />
-          // {/* Редирект для несуществующих путей */}
+
+          {/* Редирект для несуществующих путей */}
           <Route
             path="*"
             element={<Navigate to={ROUTE_CONSTANTS.NOTFOUND} replace />}

@@ -15,13 +15,7 @@ import { useTableData } from "@features/dashboard/hooks/useTableData";
 import { useStatsCards } from "@features/dashboard/hooks/useStatsCards";
 
 export const DashboardPage = () => {
-  const {
-    requests,
-    loading,
-    error,
-    stats,
-    chartData,
-  } = useDashboardData();
+  const { requests, loading, error, stats, chartData } = useDashboardData();
 
   const tableData = useTableData(requests);
   const statsCards = useStatsCards(stats);
@@ -94,7 +88,10 @@ export const DashboardPage = () => {
                       textAnchor="end"
                       height={80}
                     />
-                    <YAxis />
+                    <YAxis
+                      allowDecimals={false}
+                      tickFormatter={(value) => Math.floor(value)}
+                    />
                     <Tooltip
                       formatter={(value) => [`${value} заявок`, "Количество"]}
                       labelFormatter={(label) => `Дата: ${label}`}
@@ -121,7 +118,7 @@ export const DashboardPage = () => {
             data={tableData}
             showMoreButton={true}
             maxVisibleRows={10}
-            hideCheckboxes={true} 
+            hideCheckboxes={true}
           />
         </div>
       </main>

@@ -25,20 +25,29 @@ import {
 
 const initialFormData = {
   address: "",
-  applicant: {
-    id: "",
-  },
+  applicant: { id: "" },
   behavior: "",
   contact_person: "",
   dogs_count: 0,
   urgency: "",
-  source: {
-    id: "",
-  },
+  source: { id: "" },
+};
+
+type ValidationErrors = {
+  address?: string;
+  dogs_count?: string;
+  behavior?: string;
+  urgency?: string;
+  contact_person?: string;
+  applicant?: string;
+  source?: string;
 };
 
 export const Application = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const [showInput, setShowInput] = useState(false);
+  const handleShowInput = () => setShowInput(!showInput);
 
   const {
     loading,
@@ -51,38 +60,65 @@ export const Application = () => {
     handleClear,
   } = useHandleSubmit(initialFormData);
 
-  // Функция для показа подтверждения
-  const handleSubmitClick = () => {
-    // Проверяем обязательные поля перед показом модального окна
-    if (
-      !formData.address ||
-      !formData.applicant.id ||
-      !formData.contact_person ||
-      !formData.behavior ||
-      !formData.urgency ||
-      formData.dogs_count <= 0
-    ) {
-      alert("Заполните все обязательные поля");
-      return;
+  // ⭐ Ошибки валидации
+  const [errors, setErrors] = useState<ValidationErrors>({});
+
+  // ----------------- ВАЛИДАЦИЯ -----------------
+
+  const validateField = (field: string, value: any) => {
+    switch (field) {
+      case "address":
+        return value ? "" : "Введите адрес";
+      case "dogs_count":
+        return value > 0 ? "" : "Количество должно быть больше 0";
+      case "behavior":
+        return value ? "" : "Выберите поведение";
+      case "urgency":
+        return value ? "" : "Выберите срочность";
+      case "contact_person":
+        return value ? "" : "Введите контактное лицо";
+      case "applicant":
+        return value.id ? "" : "Выберите заявителя";
+      case "source":
+        return value.id ? "" : "Выберите сведения о заявителе";
+      default:
+        return "";
     }
+  };
+
+  const validateForm = () => {
+    const newErrors = {
+      address: validateField("address", formData.address),
+      dogs_count: validateField("dogs_count", formData.dogs_count),
+      behavior: validateField("behavior", formData.behavior),
+      urgency: validateField("urgency", formData.urgency),
+      contact_person: validateField("contact_person", formData.contact_person),
+      applicant: validateField("applicant", formData.applicant),
+      source: validateField("source", formData.source),
+    };
+
+    setErrors(newErrors);
+
+    // Если есть хотя бы одна ошибка → return false
+    return Object.values(newErrors).every((error) => error === "");
+  };
+
+  // ----------------- ПОДТВЕРЖДЕНИЕ -----------------
+
+  const handleSubmitClick = () => {
+    if (!validateForm()) return; // ❌ Не показываем модалку
     setShowConfirmation(true);
   };
 
-  // Функция подтверждения отправки
   const handleConfirmSubmit = async () => {
     await originalHandleSubmit();
-    setShowConfirmation(false);
-  };
-
-  // Функция отмены отправки
-  const handleCancelSubmit = () => {
     setShowConfirmation(false);
   };
 
   return (
     <div className="sm:h-screen h-full mt-20 sm:mt-0 flex justify-center w-full sm:items-center px-4">
       <div className="w-[1050px] mx-auto p-6 border-1 border-gray-300 rounded-xl bg-white">
-        {/* Сообщения об ошибках/успехе */}
+        {/* Сообщения */}
         {submitError && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
             <div className="text-red-800 font-medium">Ошибка отправки</div>
@@ -96,7 +132,7 @@ export const Application = () => {
             <div className="text-green-600 mt-1">Заявка успешно отправлена</div>
           </div>
         )}
-        {/* Заголовок */}
+
         <h2 className="text-lg font-semibold flex items-center gap-2 mb-1">
           <ClipboardPlus /> Подача заявки
         </h2>
@@ -104,9 +140,8 @@ export const Application = () => {
           * Заполните все поля для подачи заявки
         </p>
 
-        {/* Контент через flex */}
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Левая колонка */}
+          {/* ЛЕВАЯ КОЛОНКА */}
           <div className="flex-1 flex flex-col gap-4">
             <h3 className="font-semibold text-sm mb-2">Информация о собаке</h3>
 
@@ -117,10 +152,18 @@ export const Application = () => {
               type="text"
               placeholder="Введите адрес"
               required
-              value={formData.address || ""}
-              onChange={(e) => handleInputChange("address", e.target.value)}
-              // disabled={loading}
+              value={formData.address}
+              onChange={(e) => {
+                handleInputChange("address", e.target.value);
+                setErrors({
+                  ...errors,
+                  address: validateField("address", e.target.value),
+                });
+              }}
             />
+            {errors.address && (
+              <p className="text-red-500 text-sm">{errors.address}</p>
+            )}
 
             <InputWithLabel
               icon={<RectangleEllipsis className="h-5 w-5" />}
@@ -129,12 +172,19 @@ export const Application = () => {
               type="number"
               placeholder="Введите количество"
               required
-              value={formData.dogs_count || ""}
-              onChange={(e) =>
-                handleInputChange("dogs_count", parseInt(e.target.value) || 0)
-              }
-              // disabled={loading}
+              value={formData.dogs_count}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                handleInputChange("dogs_count", value);
+                setErrors({
+                  ...errors,
+                  dogs_count: validateField("dogs_count", value),
+                });
+              }}
             />
+            {errors.dogs_count && (
+              <p className="text-red-500 text-sm">{errors.dogs_count}</p>
+            )}
 
             <Label>
               <Smile className="h-5 w-5" /> Поведение
@@ -145,10 +195,19 @@ export const Application = () => {
                 { label: "Агрессивное", value: "Агрессивное" },
                 { label: "Неагрессивное", value: "Неагрессивное" },
               ]}
-              value={formData.behavior || ""}
-              onValueChange={handleSelectChange("behavior")}
+              value={formData.behavior}
+              onValueChange={(v) => {
+                handleSelectChange("behavior")(v);
+                setErrors({
+                  ...errors,
+                  behavior: validateField("behavior", v),
+                });
+              }}
               disabled={loading}
             />
+            {errors.behavior && (
+              <p className="text-red-500 text-sm">{errors.behavior}</p>
+            )}
 
             <Label>
               <Clock className="h-5 w-5" /> Срочность
@@ -159,13 +218,19 @@ export const Application = () => {
                 { label: "Срочно", value: "Срочно" },
                 { label: "Не срочно", value: "Не срочно" },
               ]}
-              value={formData.urgency || ""}
-              onValueChange={handleSelectChange("urgency")}
+              value={formData.urgency}
+              onValueChange={(v) => {
+                handleSelectChange("urgency")(v);
+                setErrors({ ...errors, urgency: validateField("urgency", v) });
+              }}
               disabled={loading}
             />
+            {errors.urgency && (
+              <p className="text-red-500 text-sm">{errors.urgency}</p>
+            )}
           </div>
 
-          {/* Правая колонка */}
+          {/* ПРАВАЯ КОЛОНКА */}
           <div className="flex-1 flex flex-col gap-4">
             <h3 className="font-semibold text-sm mb-2">
               Информация о заявителе
@@ -177,21 +242,75 @@ export const Application = () => {
             <Select
               placeholder="Выберите заявителя"
               items={ApplicantOptions}
-              value={formData.applicant.id || ""}
-              onValueChange={handleSelectChange("applicant")}
+              value={formData.applicant.id}
+              onValueChange={(v) => {
+                handleSelectChange("applicant")(v);
+                setErrors({
+                  ...errors,
+                  applicant: validateField("applicant", { id: v }),
+                });
+              }}
               disabled={loading}
             />
+            {errors.applicant && (
+              <p className="text-red-500 text-sm">{errors.applicant}</p>
+            )}
 
-            <Label>
-              <FileUser className="h-5 w-5" /> Сведения о заявителе
-            </Label>
-            <Select
-              placeholder="Выберите сведения о заявителе"
-              items={SourceOptions}
-              value={formData.source.id || ""}
-              onValueChange={handleSelectChange("source")}
-              disabled={loading}
-            />
+            <div className="flex gap-1 flex-col">
+              <Label>
+                <FileUser className="h-5 w-5" /> Сведения о заявителе
+              </Label>
+
+              <button
+                onClick={handleShowInput}
+                className="text-xs text-start text-blue-500 hover:underline cursor-pointer"
+              >
+                {showInput ? "Выбрать из списка" : "Ввести свои сведения"}
+              </button>
+
+              {/* --- Если пользователь хочет вводить свои сведения --- */}
+              {showInput ? (
+                <>
+                  <InputWithLabel
+                    label=""
+                    id="custom_source"
+                    type="text"
+                    placeholder="Введите сведения о заявителе"
+                    value={formData.source.id}
+                    onChange={(e) => {
+                      handleSelectChange("source")(e.target.value);
+                      setErrors({
+                        ...errors,
+                        source: validateField("source", { id: e.target.value }),
+                      });
+                    }}
+                  />
+                  {errors.source && (
+                    <p className="text-red-500 text-sm">{errors.source}</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* --- Если выбирает из списка --- */}
+                  <Select
+                    placeholder="Выберите сведения о заявителе"
+                    items={SourceOptions}
+                    value={formData.source.id}
+                    onValueChange={(v) => {
+                      handleSelectChange("source")(v);
+                      setErrors({
+                        ...errors,
+                        source: validateField("source", { id: v }),
+                      });
+                    }}
+                    disabled={loading}
+                  />
+                  {errors.source && (
+                    <p className="text-red-500 text-sm">{errors.source}</p>
+                  )}
+                </>
+              )}
+            </div>
 
             <InputWithLabel
               icon={<Contact className="h-5 w-5" />}
@@ -200,30 +319,37 @@ export const Application = () => {
               type="text"
               placeholder="Введите контактное лицо"
               required
-              value={formData.contact_person || ""}
-              onChange={(e) =>
-                handleInputChange("contact_person", e.target.value)
-              }
-              // disabled={loading}
+              value={formData.contact_person}
+              onChange={(e) => {
+                handleInputChange("contact_person", e.target.value);
+                setErrors({
+                  ...errors,
+                  contact_person: validateField(
+                    "contact_person",
+                    e.target.value
+                  ),
+                });
+              }}
             />
+            {errors.contact_person && (
+              <p className="text-red-500 text-sm">{errors.contact_person}</p>
+            )}
           </div>
         </div>
 
-        {/* Кнопки */}
+        {/* КНОПКИ */}
         <div className="flex items-center mt-6 w-full gap-6">
           <Button
-            variant={"cube"}
-            size={"default"}
-            color={"grey"}
+            variant="cube"
+            color="grey"
             className="flex-1"
             onClick={handleClear}
-            disabled={loading}
           >
             Очистить форму
           </Button>
+
           <Button
-            variant={"cube"}
-            size={"default"}
+            variant="cube"
             color="default"
             className="flex-1"
             onClick={handleSubmitClick}
@@ -234,7 +360,7 @@ export const Application = () => {
         </div>
       </div>
 
-      {/* Модальное окно подтверждения из shadcn */}
+      {/* МОДАЛКА */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -244,22 +370,19 @@ export const Application = () => {
           </DialogHeader>
           <div className="py-4">
             <p className="text-gray-600">
-              Вы уверены, что хотите отправить заявку? Проверьте правильность
-              введенных данных.
+              Вы уверены, что хотите отправить заявку? Проверьте введённые
+              данные.
             </p>
           </div>
           <DialogFooter className="flex gap-2 sm:justify-end">
             <Button
-              className="w-[125px]"
               variant="cube"
               color="grey"
-              onClick={handleCancelSubmit}
-              disabled={loading}
+              onClick={() => setShowConfirmation(false)}
             >
               Отмена
             </Button>
             <Button
-              className="w-[125px]"
               variant="cube"
               color="default"
               onClick={handleConfirmSubmit}

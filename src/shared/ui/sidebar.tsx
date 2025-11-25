@@ -38,7 +38,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   return (
     <aside className={clsx(className, "w-60 h-fit mr-4 p-4")}>
       <div className="text-xl mt-2 mb-4 font-medium flex items-center gap-2">
-        <ClipboardPlus /> Главная
+        <ClipboardPlus /> Навигация
       </div>
       <nav className="flex flex-col gap-2 text-base border border-gray-200 rounded-xl p-2">
         <Link
