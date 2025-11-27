@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "@shared/api/axios";
+import { SourceOptions } from "@shared/config/selectOptions";
 
 interface ApplicationData {
     applicant: {
@@ -20,41 +21,44 @@ export const useHandleSubmit = (initialFormData: ApplicationData) => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [formData, setFormData] = useState<ApplicationData>(initialFormData);
+  const [customSourceName, setCustomSourceName] = useState("");
+  const [showCustomSource, setShowCustomSource] = useState(false);
 
-  // Обработчик для текстовых полей
   const handleInputChange = (field: string, value: string | number) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+    setSubmitError(null);
   };
 
-  // Обработчик для селектов
-const handleSelectChange = (field: string) => (selectedValue: string) => {
-  console.log(`handleSelectChange: ${field} = ${selectedValue}`);
-  
-  if (field === "applicant") {
-    setFormData((prev) => ({
-      ...prev,
-      applicant: {
-        id: selectedValue,
-      },
-    }));
-  } else if (field === "source") {
-    // ИСПРАВЛЕНО: для source тоже создаем объект с id
-    setFormData((prev) => ({
-      ...prev,
-      source: {
-        id: selectedValue,
-      },
-    }));
-  } else {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: selectedValue,
-    }));
-  }
-};
+  const handleSelectChange = (field: string) => (selectedValue: string) => {
+    console.log(`handleSelectChange: ${field} = ${selectedValue}`);
+    
+    if (field === "applicant") {
+      setFormData((prev) => ({
+        ...prev,
+        applicant: {
+          id: selectedValue,
+        },
+      }));
+    } else if (field === "source") {
+      if (!showCustomSource) {
+        setFormData((prev) => ({
+          ...prev,
+          source: {
+            id: selectedValue,
+          },
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: selectedValue,
+      }));
+    }
+    setSubmitError(null);
+  };
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -62,13 +66,43 @@ const handleSelectChange = (field: string) => (selectedValue: string) => {
     setSubmitSuccess(false);
 
     try {
-      // Формируем финальный JSON (убираем поля, которые сервер генерирует сам)
+      let sourceName = "";
+      
+      if (showCustomSource) {
+        sourceName = customSourceName;
+        console.log("Using CUSTOM source name:", sourceName);
+      } else {
+        const selectedSource = SourceOptions.find(option => option.value === formData.source.id);
+        console.log("Looking for source with ID:", formData.source.id, "Available options:", SourceOptions);
+        
+        if (selectedSource) {
+          sourceName = selectedSource.label;
+          console.log("Using SELECTED source from options:", selectedSource.label);
+        } else {
+          sourceName = formData.source.id;
+          console.log("Using source ID as name (not found in options):", formData.source.id);
+        }
+      }
+
+      console.log("DEBUG - Final values:", {
+        showCustomSource,
+        customSourceName,
+        sourceId: formData.source.id,
+        finalSourceName: sourceName
+      });
+
+      if (!sourceName) {
+        throw new Error("Не заполнены сведения о заявителе");
+      }
+
       const submissionData = {
         applicant: {
           id: formData.applicant.id,
+          name: ""
         },
         source: {
-          id: formData.source.id,
+          id: "",
+          name: sourceName
         },
         address: formData.address,
         dogs_count: Number(formData.dogs_count),
@@ -79,7 +113,6 @@ const handleSelectChange = (field: string) => (selectedValue: string) => {
 
       console.log("Отправка данных на /requests:", submissionData);
 
-      // Отправка на API через ваш axios instance
       const response = await api.post("/requests", submissionData);
 
       console.log("Успешный ответ от сервера:", response.data);
@@ -87,18 +120,14 @@ const handleSelectChange = (field: string) => (selectedValue: string) => {
       setSubmitSuccess(true);
       handleClear();
 
-      // Автоматически скрываем сообщение об успехе через 5 секунд
       setTimeout(() => setSubmitSuccess(false), 5000);
     } catch (error: any) {
       console.error("Ошибка при отправке заявки:", error);
 
-      // Обработка ошибок через ваш interceptor
       if (error.response?.data) {
-        // Пытаемся получить сообщение об ошибке от сервера
         const serverError = error.response.data;
 
         if (typeof serverError === "object") {
-          // Если ошибка в формате { field: ["error message"] }
           const errorMessages = Object.values(serverError).flat();
           setSubmitError(
             errorMessages.join(", ") || "Ошибка при отправке заявки"
@@ -121,6 +150,21 @@ const handleSelectChange = (field: string) => (selectedValue: string) => {
 
   const handleClear = () => {
     setFormData(initialFormData);
+    setCustomSourceName("");
+    setShowCustomSource(false);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+  };
+
+  const toggleCustomSource = () => {
+    const newShowCustomSource = !showCustomSource;
+    setShowCustomSource(newShowCustomSource);
+    
+    if (newShowCustomSource) {
+      setFormData(prev => ({ ...prev, source: { id: "" } }));
+    } else {
+      setCustomSourceName("");
+    }
   };
 
   return {
@@ -128,10 +172,14 @@ const handleSelectChange = (field: string) => (selectedValue: string) => {
     submitError,
     submitSuccess,
     formData,
+    customSourceName,
+    setCustomSourceName,
+    showCustomSource,
     handleInputChange,
     handleSelectChange,
     handleSubmit,
     handleClear,
+    toggleCustomSource,
     setFormData,
   };
 };
