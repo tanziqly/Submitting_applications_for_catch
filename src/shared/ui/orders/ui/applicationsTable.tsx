@@ -43,7 +43,16 @@ type ValidationErrors = {
   source?: string;
 };
 
-export const Application = () => {
+// Добавьте интерфейс для пропсов
+interface ApplicationsTableProps {
+  title?: string;
+  data?: any[];
+  showMoreButton?: boolean;
+  maxVisibleRows?: number;
+  hideCheckboxes?: boolean;
+}
+
+export const ApplicationsTable = (_props: ApplicationsTableProps) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const {

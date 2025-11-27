@@ -90,11 +90,11 @@ export const DashboardPage = () => {
                     />
                     <YAxis
                       allowDecimals={false}
-                      tickFormatter={(value) => Math.floor(value)}
+                      tickFormatter={(value: any) => Math.floor(value).toString()}
                     />
                     <Tooltip
-                      formatter={(value) => [`${value} заявок`, "Количество"]}
-                      labelFormatter={(label) => `Дата: ${label}`}
+                      formatter={(value: any) => [`${value} заявок`, "Количество"]}
+                      labelFormatter={(label: string) => `Дата: ${label}`}
                     />
                     <Line
                       type="monotone"
