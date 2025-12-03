@@ -2,9 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@shared/ui/button";
-import { Upload, Download, FileText } from "lucide-react";
+import { Upload, Download, FileText, Trash2 } from "lucide-react";
 import type { TableRowData, OrderModalProps } from "./types";
-import { changeRequestStatus, getCatchActDocument, getCompletedActDocument } from "./api";
+import { 
+  changeRequestStatus, 
+  getCatchActDocument, 
+  getCompletedActDocument,
+  deleteRequest 
+} from "./api";
 import { authStore } from "@features/auth";
 
 export const OrderModal: React.FC<OrderModalProps> = ({
@@ -15,6 +20,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   onOpenUploadModal,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [documentError, setDocumentError] = useState<string | null>(null);
   const [isStatusEditMode, setIsStatusEditMode] = useState(false);
   const [localData, setLocalData] = useState<TableRowData | undefined>(data);
@@ -45,6 +51,41 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Функция для удаления заявки
+  const handleDeleteRequest = async () => {
+    if (!localData?.id) {
+      setDocumentError("Не удалось определить ID заявки");
+      return;
+    }
+
+    if (!window.confirm(`Вы уверены, что хотите удалить заявку №${localData.number}? Это действие нельзя отменить.`)) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(true);
+      setDocumentError(null);
+
+      await deleteRequest(String(localData.id));
+      
+      // Закрываем модальное окно
+      onClose();
+      
+      // Обновляем страницу для отражения изменений
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+      
+    } catch (err: any) {
+      console.error("Ошибка при удалении заявки:", err);
+      setDocumentError(
+        err.response?.data?.message || "Не удалось удалить заявку"
+      );
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -280,6 +321,19 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                   >
                     Закрыть
                   </Button>
+
+                  {/* Кнопка удаления заявки - показывается только для ryaon_comm или podryadchik */}
+                  {(user?.login === "ryaon_comm" || user?.login === "podryadchik") && (
+                    <Button
+                      variant="outline"
+                      className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700 flex-1"
+                      onClick={handleDeleteRequest}
+                      disabled={deleteLoading}
+                    >
+                      <Trash2 size={16} className="mr-2" />
+                      {deleteLoading ? "Удаление..." : "Удалить заявку"}
+                    </Button>
+                  )}
                 </>
               )}
             </div>

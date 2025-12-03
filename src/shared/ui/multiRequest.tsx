@@ -134,7 +134,7 @@ export default function FilterDropdownInline() {
       
       if (err.response) {
         if (err.response.status === 500) {
-          setError("Ошибка сервера. Попробуйте позже или обратитесь к администратору");
+          setError("В данном диапазоне дат не найдено заявок. Повторите попытку с актуальными датами");
         } else if (err.response.data?.message) {
           setError(err.response.data.message);
         } else {

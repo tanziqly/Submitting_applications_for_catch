@@ -13,10 +13,31 @@ import { Sidebar } from "@shared/ui/sidebar";
 import { useDashboardData } from "@features/dashboard/hooks/useDashboardData";
 import { useTableData } from "@features/dashboard/hooks/useTableData";
 import { useStatsCards } from "@features/dashboard/hooks/useStatsCards";
+import { Select } from "@shared/ui/dropdown";
+import { useState } from "react";
+import { ApplicantOptions } from "@shared/config/selectOptions";
+
+// Создаем опции для выбора территориальных отделов на основе ApplicantOptions
+const getTerritorialOptions = () => {
+  const allOption = { label: "Все отделы", value: "all" };
+  
+  const departmentOptions = ApplicantOptions.map(option => ({
+    label: option.label,
+    value: option.value
+  }));
+  
+  return [allOption, ...departmentOptions];
+};
 
 export const DashboardPage = () => {
-  const { requests, loading, error, stats, chartData } = useDashboardData();
-
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
+  const territorialOptions = getTerritorialOptions();
+  
+  // Передаем выбранный отдел в хук для фильтрации данных на сервере
+  const { requests, loading, error, stats, chartData } = useDashboardData(
+    selectedDepartment !== "all" ? selectedDepartment : undefined
+  );
+  
   const tableData = useTableData(requests);
   const statsCards = useStatsCards(stats);
 
@@ -53,11 +74,40 @@ export const DashboardPage = () => {
     );
   }
 
+  // Получаем название выбранного отдела для отображения
+  const selectedDepartmentName = selectedDepartment === "all" 
+    ? "Все отделы" 
+    : territorialOptions.find(opt => opt.value === selectedDepartment)?.label || selectedDepartment;
+
   return (
     <div className="flex min-h-screen w-full max-w-[1440px] mt-20 bg-white">
       <Sidebar className="hidden lg:block" />
 
       <main className="flex-1 w-full border-l border-gray-200 p-6 space-y-6">
+        {/* Заголовок и фильтр по отделу */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Дашборд</h1>
+            <p className="text-gray-600 mt-1">
+              Обзор статистики и последних заявок
+              {selectedDepartment !== "all" && (
+                <span className="ml-2 font-medium">
+                  ({selectedDepartmentName})
+                </span>
+              )}
+            </p>
+          </div>
+          
+          <div className="w-full sm:w-auto">
+            <Select
+              placeholder="Выберите отдел"
+              items={territorialOptions}
+              value={selectedDepartment}
+              onValueChange={(value) => setSelectedDepartment(value)}
+            />
+          </div>
+        </div>
+
         {/* Статистика */}
         <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
           {statsCards.map((item) => (
@@ -69,12 +119,20 @@ export const DashboardPage = () => {
             </Card>
           ))}
         </div>
+
         {/* График */}
         <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
           <div className="min-w-[700px] sm:min-w-full">
             <Card className="border-none shadow-none">
               <CardHeader>
-                <CardTitle>Статистика заявок за последние 10 дней</CardTitle>
+                <CardTitle>
+                  Статистика заявок за последние 10 дней
+                  {selectedDepartment !== "all" && (
+                    <span className="text-sm font-normal text-gray-600 ml-2">
+                      (по выбранному отделу)
+                    </span>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -114,7 +172,7 @@ export const DashboardPage = () => {
         {/* Таблица */}
         <div className="min-w-full flex pb-2 gap-6 overflow-x-auto flex-nowrap">
           <ApplicationsTable
-            title="Последние заявки"
+            title={`Последние заявки (${selectedDepartmentName})`}
             data={tableData}
             showMoreButton={true}
             maxVisibleRows={10}

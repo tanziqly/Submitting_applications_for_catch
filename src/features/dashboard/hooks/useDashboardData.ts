@@ -14,8 +14,25 @@ export interface ChartData {
   value: number;
 }
 
-export const useDashboardData = () => {
-  const [requests, setRequests] = useState<Request[]>([]);
+// Функция для получения ID заявителя из заявки
+const getApplicantId = (request: Request): string => {
+  if (!request) return '';
+  
+  if (typeof request.applicant === 'string') {
+    return request.applicant;
+  } else if (request.applicant && typeof request.applicant === 'object') {
+    if ('id' in request.applicant) {
+      return request.applicant.id;
+    } else if ('value' in request.applicant) {
+      return request.applicant;
+    }
+  }
+  return '';
+};
+
+export const useDashboardData = (department?: string) => {
+  const [allRequests, setAllRequests] = useState<Request[]>([]);
+  const [filteredRequests, setFilteredRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
@@ -25,6 +42,18 @@ export const useDashboardData = () => {
     completed: 0,
   });
   const [chartData, setChartData] = useState<ChartData[]>([]);
+
+  // Функция для фильтрации заявок по отделу
+  const filterRequestsByDepartment = (requests: Request[], department?: string): Request[] => {
+    if (!department) {
+      return requests;
+    }
+    
+    return requests.filter(request => {
+      const applicantId = getApplicantId(request);
+      return applicantId === department;
+    });
+  };
 
   const calculateStats = (data: Request[]) => {
     const stats: DashboardStats = {
@@ -66,14 +95,30 @@ export const useDashboardData = () => {
     setChartData(chartData);
   };
 
+  // При изменении department фильтруем заявки
+  useEffect(() => {
+    const filtered = filterRequestsByDepartment(allRequests, department);
+    setFilteredRequests(filtered);
+    
+    // Пересчитываем статистику и график для отфильтрованных данных
+    calculateStats(filtered);
+    generateChartData(filtered);
+  }, [department, allRequests]);
+
+  // Первоначальная загрузка данных
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const data = await getRequests();
-        setRequests(data);
-        calculateStats(data);
-        generateChartData(data);
+        setAllRequests(data);
+        
+        // Фильтруем данные при первоначальной загрузке
+        const filtered = filterRequestsByDepartment(data, department);
+        setFilteredRequests(filtered);
+        calculateStats(filtered);
+        generateChartData(filtered);
+        
         setError(null);
       } catch (err: any) {
         console.error("Ошибка при загрузке данных:", err);
@@ -86,13 +131,8 @@ export const useDashboardData = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    calculateStats(requests);
-    generateChartData(requests);
-  }, [requests]);
-
   return {
-    requests,
+    requests: filteredRequests, // Возвращаем отфильтрованные заявки
     loading,
     error,
     stats,

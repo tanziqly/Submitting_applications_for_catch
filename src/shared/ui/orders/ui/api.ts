@@ -81,3 +81,8 @@ export const completeRequest = async (requestId: string): Promise<void> => {
     throw new Error("Не удалось изменить статус заявки на 'Выполнена'");
   }
 };
+
+export const deleteRequest = async (requestId: string): Promise<void> => {
+  const response = await api.delete(`/request/${requestId}`);
+  return response.data;
+};

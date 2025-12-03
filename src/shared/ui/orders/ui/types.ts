@@ -37,6 +37,7 @@ export interface OrderModalProps {
   data?: TableRowData;
   onStatusChange?: (id: string | number, newStatus: string) => void;
   onOpenUploadModal?: (requestData: TableRowData) => void;
+  onDeleteSuccess?: () => void; // Добавляем callback для успешного удаления
 }
 
 export interface UploadDocumentModalProps {
