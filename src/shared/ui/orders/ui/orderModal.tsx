@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@shared/ui/button";
 import { Upload, Download, FileText, Trash2 } from "lucide-react";
 import type { TableRowData, OrderModalProps } from "./types";
-import { 
-  changeRequestStatus, 
-  getCatchActDocument, 
+import {
+  changeRequestStatus,
+  getCatchActDocument,
   getCompletedActDocument,
-  deleteRequest 
+  deleteRequest,
 } from "./api";
 import { authStore } from "@features/auth";
 
@@ -61,7 +61,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       return;
     }
 
-    if (!window.confirm(`Вы уверены, что хотите удалить заявку №${localData.number}? Это действие нельзя отменить.`)) {
+    if (
+      !window.confirm(
+        `Вы уверены, что хотите удалить заявку №${localData.number}? Это действие нельзя отменить.`
+      )
+    ) {
       return;
     }
 
@@ -70,15 +74,14 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       setDocumentError(null);
 
       await deleteRequest(String(localData.id));
-      
+
       // Закрываем модальное окно
       onClose();
-      
+
       // Обновляем страницу для отражения изменений
       setTimeout(() => {
         window.location.reload();
       }, 300);
-      
     } catch (err: any) {
       console.error("Ошибка при удалении заявки:", err);
       setDocumentError(
@@ -101,8 +104,12 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
     try {
       // Извлекаем год из даты заявки
-      const requestYear = localData.date ? new Date(localData.date.split('.').reverse().join('-')).getFullYear().toString() : new Date().getFullYear().toString();
-      
+      const requestYear = localData.date
+        ? new Date(localData.date.split(".").reverse().join("-"))
+            .getFullYear()
+            .toString()
+        : new Date().getFullYear().toString();
+
       const url = await getCatchActDocument(localData.number, requestYear);
       window.open(url, "_blank");
       setTimeout(() => onClose(), 1000);
@@ -126,14 +133,20 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
     try {
       // Извлекаем год из даты заявки
-      const requestYear = localData.date ? new Date(localData.date.split('.').reverse().join('-')).getFullYear().toString() : new Date().getFullYear().toString();
-      
+      const requestYear = localData.date
+        ? new Date(localData.date.split(".").reverse().join("-"))
+            .getFullYear()
+            .toString()
+        : new Date().getFullYear().toString();
+
       const url = await getCompletedActDocument(localData.number, requestYear);
       window.open(url, "_blank");
       setTimeout(() => onClose(), 1000);
     } catch (error: any) {
       console.error("Ошибка при получении готового акта отлова:", error);
-      setDocumentError(error.message || "Ошибка при получении готового акта отлова");
+      setDocumentError(
+        error.message || "Ошибка при получении готового акта отлова"
+      );
     } finally {
       setLoading(false);
     }
@@ -153,7 +166,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   if (!open || !localData) return null;
 
   const { user } = authStore;
-  
+
   // Проверяем статусы заявки
   const isCompleted = localData.status === "Выполнена";
   const isCancelled = localData.status === "Отменена";
@@ -233,7 +246,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                 <b>Статус:</b> {localData.status || "-"}
               </div>
             </div>
-            
+
             <div className="flex flex-col gap-2">
               {isCompleted ? (
                 // Если статус "Выполнена" - показываем кнопку для скачивания готового акта
@@ -255,11 +268,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     Изменить статус
                   </Button>
 
-                  <Button
-                    variant="cube"
-                    color="grey"
-                    onClick={onClose}
-                  >
+                  <Button variant="cube" color="grey" onClick={onClose}>
                     Закрыть
                   </Button>
                 </>
@@ -274,11 +283,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     Изменить статус
                   </Button>
 
-                  <Button
-                    variant="cube"
-                    color="grey"
-                    onClick={onClose}
-                  >
+                  <Button variant="cube" color="grey" onClick={onClose}>
                     Закрыть
                   </Button>
                 </>
@@ -293,9 +298,10 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     <Download size={16} className="mr-2" />
                     {loading ? "Загрузка..." : "Получить акт на отлов"}
                   </Button>
-                  
+
                   {/* Показываем кнопку "Загрузить акт отлова" только если пользователь ryaon_comm или podryadchik */}
-                  {(user?.login === "ryaon_comm" || user?.login === "podryadchik") && (
+                  {(user?.login === "ryaon_comm" ||
+                    user?.login === "podryadchik") && (
                     <Button
                       variant="outline"
                       className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700 flex-1"
@@ -305,7 +311,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                       Загрузить акт отлова
                     </Button>
                   )}
-                  
+
                   <Button
                     variant="cube"
                     color="grey"
@@ -314,16 +320,13 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     Изменить статус
                   </Button>
 
-                  <Button
-                    variant="cube"
-                    color="grey"
-                    onClick={onClose}
-                  >
+                  <Button variant="cube" color="grey" onClick={onClose}>
                     Закрыть
                   </Button>
 
                   {/* Кнопка удаления заявки - показывается только для ryaon_comm или podryadchik */}
-                  {(user?.login === "ryaon_comm" || user?.login === "podryadchik") && (
+                  {(user?.login === "ryaon_comm" ||
+                    user?.login === "podryadchik") && (
                     <Button
                       variant="outline"
                       className="bg-red-50 hover:bg-red-100 border-red-200 text-red-700 flex-1"
