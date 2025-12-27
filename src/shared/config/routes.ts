@@ -7,4 +7,5 @@ export const ROUTE_CONSTANTS = {
   DASHBOARD: "/dashboard",
   ORDER_LOG: "/order-log",
   PROFILE: "/profile",
+  ADMIN: "/admin",
 };

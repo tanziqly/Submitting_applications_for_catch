@@ -15,14 +15,29 @@ import { OrderLog } from "./OrderLog";
 import { Profile } from "./Profile";
 
 import { ProtectedRoute } from "@shared/config/protectedRoutes";
+import { Admin } from "./Admin";
+import { authStore } from "@features/auth";
 
 export const Router: FC = () => {
+  const { user } = authStore;
+
   return (
     <BrowserRouter>
       <Layout>
         <Routes>
           {/* Публичные маршруты */}
           <Route path={ROUTE_CONSTANTS.SIGNIN} element={<SignIn />} />
+
+          {user?.login === "ryaon_comm" && (
+            <Route
+              path={ROUTE_CONSTANTS.ADMIN}
+              element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+          )}
 
           {/* Защищенный маршрут: Profile, Application, Dashboard, OrderLog */}
           <Route
