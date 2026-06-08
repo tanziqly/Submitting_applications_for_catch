@@ -26,7 +26,6 @@ export const Navbar = observer(() => {
   };
 
   const handleConfirmLogout = () => {
-    // Оберните вызов в стрелочную функцию
     authStore.logout();
     navigate("/");
     setShowLogoutConfirmation(false);
@@ -88,52 +87,72 @@ export const Navbar = observer(() => {
       </Link>
 
       {/* Правый блок */}
-      {!isAuthenticated ? (
-        <div className="flex items-center gap-1 sm:gap-3">
-          <Link to="/sign-in">
-            <Button
-              variant="default"
-              className="py-1 px-3 sm:py-2 sm:px-4"
-              size="default"
-              color="outline"
-            >
-              Войти
-            </Button>
-          </Link>
-        </div>
-      ) : (
-        // 👉 гамбургер-меню
-        <>
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="p-2 rounded-md hover:bg-gray-100 lg:hidden">
-                <Menu className="w-6 h-6" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-60 p-4 lg:hidden">
-              <AuthMenu />
-            </SheetContent>
-          </Sheet>
-          <div className="hidden lg:flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium">
-                {user?.full_name || user?.login || "Пользователь"}
-              </span>
+      <div className="flex items-center gap-1 sm:gap-3">
+        {!isAuthenticated ? (
+          <>
+            <Link to="/application">
+              <Button
+                variant="default"
+                className="py-1 px-3 sm:py-2 sm:px-4"
+                size="default"
+              >
+                Подать заявку
+              </Button>
+            </Link>
+            <Link to="/sign-in">
+              <Button
+                variant="default"
+                className="py-1 px-3 sm:py-2 sm:px-4"
+                size="default"
+                color="outline"
+              >
+                Войти
+              </Button>
+            </Link>
+            <Link to="/sign-up">
+              <Button
+                variant="default"
+                className="py-1 px-3 sm:py-2 sm:px-4"
+                size="default"
+                color="outline"
+              >
+                Регистрация
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <div className="hidden lg:flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium">
+                  {user?.full_name || user?.login || "Пользователь"}
+                </span>
+              </div>
             </div>
-          </div>
-          <Link to="/application">
-            <Button
-              variant="default"
-              className="py-1 px-3 sm:py-2 sm:px-4"
-              size="default"
-            >
-              Подать заявку
-            </Button>
-          </Link>
-        </>
-      )}
+            <Link to="/application">
+              <Button
+                variant="default"
+                className="py-1 px-3 sm:py-2 sm:px-4"
+                size="default"
+              >
+                Подать заявку
+              </Button>
+            </Link>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="p-2 rounded-md hover:bg-gray-100 lg:hidden">
+                  <Menu className="w-6 h-6" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-60 p-4 lg:hidden">
+                <AuthMenu />
+              </SheetContent>
+            </Sheet>
+          </>
+        )}
+      </div>
 
-      {/* Модальное окно подтверждения выхода - ВНЕ условного рендеринга */}
+      {/* Модальное окно подтверждения выхода */}
       <Dialog
         open={showLogoutConfirmation}
         onOpenChange={setShowLogoutConfirmation}

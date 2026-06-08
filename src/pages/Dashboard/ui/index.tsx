@@ -15,23 +15,26 @@ import { useTableData } from "@features/dashboard/hooks/useTableData";
 import { useStatsCards } from "@features/dashboard/hooks/useStatsCards";
 import { Select } from "@shared/ui/dropdown";
 import { useState } from "react";
-import { ApplicantOptions } from "@shared/config/selectOptions";
+import { SourceOptions } from "@shared/config/selectOptions";
+import { authStore } from "@features/auth";
 
-// Создаем опции для выбора территориальных отделов на основе ApplicantOptions
+// Создаем опции для выбора территориальных отделов на основе SourceOptions
 const getTerritorialOptions = () => {
   const allOption = { label: "Все отделы", value: "all" };
-  
-  const departmentOptions = ApplicantOptions.map(option => ({
+
+  const departmentOptions = SourceOptions.map(option => ({
     label: option.label,
     value: option.value
   }));
-  
+
   return [allOption, ...departmentOptions];
 };
 
 export const DashboardPage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const territorialOptions = getTerritorialOptions();
+  const { user } = authStore;
+  const isAdminOrContractor = user?.login === "ryaon_comm" || user?.login === "podryadchik";
   
   // Передаем выбранный отдел в хук для фильтрации данных на сервере
   const { requests, loading, error, stats, chartData } = useDashboardData(
@@ -98,14 +101,16 @@ export const DashboardPage = () => {
             </p>
           </div>
           
-          <div className="w-full sm:w-auto">
-            <Select
-              placeholder="Выберите отдел"
-              items={territorialOptions}
-              value={selectedDepartment}
-              onValueChange={(value) => setSelectedDepartment(value)}
-            />
-          </div>
+          {isAdminOrContractor && (
+            <div className="w-full sm:w-auto">
+              <Select
+                placeholder="Выберите отдел"
+                items={territorialOptions}
+                value={selectedDepartment}
+                onValueChange={(value) => setSelectedDepartment(value)}
+              />
+            </div>
+          )}
         </div>
 
         {/* Статистика */}

@@ -14,6 +14,7 @@ export interface TableRowData {
   applicantInfo?: string;
   contactPerson?: string;
   status?: string;
+  actFile?: string;
   source?: {
     id: string;
     name: string;

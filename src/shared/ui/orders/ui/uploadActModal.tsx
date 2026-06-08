@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "@shared/ui/button";
 import { Upload, File, X, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import type { UploadDocumentModalProps } from "./types";
-import { uploadAct, completeRequest } from "./api";
+import { uploadAct } from "./api";
 
 export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
   open,
@@ -42,22 +42,13 @@ export const UploadDocumentModal: React.FC<UploadDocumentModalProps> = ({
       setLoading(true);
       setUploadError(null);
 
-      // Загружаем акт
+      // Загружаем акт (бэкенд автоматически меняет статус на "Выполнена")
       await uploadAct({
         number: requestData.number,
         id: String(requestData.id),
         status: requestData.status || "в работе",
         file: selectedFile,
       });
-
-      // После успешной загрузки акта меняем статус на "Выполнена"
-      try {
-        await completeRequest(String(requestData.id));
-        console.log("Статус заявки успешно изменен на 'Выполнена'");
-      } catch (statusError) {
-        console.error("Не удалось изменить статус, но акт загружен:", statusError);
-        // Продолжаем выполнение даже если не удалось изменить статус
-      }
 
       setUploadSuccess(true);
       setTimeout(() => {

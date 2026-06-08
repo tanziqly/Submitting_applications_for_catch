@@ -7,6 +7,7 @@ import { ROUTE_CONSTANTS } from "@shared/config/routes";
 import { Application } from "@pages/Application";
 import { Home } from "@pages/Home";
 import { SignIn } from "@pages/SignIn";
+import { SignUp } from "@pages/SignUp";
 import { NotFound } from "@pages/NotFound";
 import { ServerError } from "@pages/ServerError";
 import { Layout } from "@widgets/Layout";
@@ -15,44 +16,23 @@ import { OrderLog } from "./OrderLog";
 import { Profile } from "./Profile";
 
 import { ProtectedRoute } from "@shared/config/protectedRoutes";
-import { Admin } from "./Admin";
-import { authStore } from "@features/auth";
 
 export const Router: FC = () => {
-  const { user } = authStore;
-
   return (
     <BrowserRouter>
       <Layout>
         <Routes>
           {/* Публичные маршруты */}
           <Route path={ROUTE_CONSTANTS.SIGNIN} element={<SignIn />} />
+          <Route path={ROUTE_CONSTANTS.SIGNUP} element={<SignUp />} />
+          <Route path={ROUTE_CONSTANTS.APPLICATION} element={<Application />} />
 
-          {user?.login === "ryaon_comm" && (
-            <Route
-              path={ROUTE_CONSTANTS.ADMIN}
-              element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
-          )}
-
-          {/* Защищенный маршрут: Profile, Application, Dashboard, OrderLog */}
+          {/* Защищенные маршруты */}
           <Route
             path={ROUTE_CONSTANTS.PROFILE}
             element={
               <ProtectedRoute>
                 <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTE_CONSTANTS.APPLICATION}
-            element={
-              <ProtectedRoute>
-                <Application />
               </ProtectedRoute>
             }
           />

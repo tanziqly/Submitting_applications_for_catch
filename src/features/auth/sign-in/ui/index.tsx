@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 
 import { Button } from "@shared/ui/button";
 import { InputWithLabel } from "@shared/ui/inputLabel";
@@ -106,6 +106,13 @@ export const SignInForm = () => {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Входим..." : "Войти"}
           </Button>
+
+          <p className="text-center text-sm text-gray-500">
+            Нет аккаунта?{" "}
+            <Link to="/sign-up" className="text-blue-500 hover:underline">
+              Зарегистрироваться
+            </Link>
+          </p>
         </form>
         <img src={Dog} alt="собака" className="hidden w-full lg:block" />
       </div>

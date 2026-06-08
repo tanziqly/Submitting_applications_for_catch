@@ -79,16 +79,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
         >
           Выйти
         </button>
-        <Link
-          to="/admin"
-          className={`rounded-md text-neutral-500 px-4 py-2 transition ${
-            location.pathname === "/admin"
-              ? "bg-blue-100 hover:bg-blue-200 font-medium"
-              : "hover:bg-gray-100"
-          }`}
-        >
-          Админ
-        </Link>
       </nav>
 
       {/* Модальное окно подтверждения выхода */}

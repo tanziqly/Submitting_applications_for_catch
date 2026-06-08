@@ -9,12 +9,12 @@ import {
   Contact,
   Smile,
   Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Select } from "@shared/ui/dropdown";
 import { Label } from "@shared/ui/label";
-import { ApplicantOptions, SourceOptions } from "@shared/config/selectOptions";
 import { useHandleSubmit } from "@features/request/hooks/useHandleSubmit";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@shared/ui/dialog";
+import { Loader2 } from "lucide-react";
+import { SourceOptions, ApplicantOptions } from "@shared/config/selectOptions";
 
 const initialFormData = {
   address: "",
@@ -43,15 +45,33 @@ type ValidationErrors = {
   source?: string;
 };
 
+// Типы для данных
+type ApplicantItem = {
+  id: string;
+  name: string;
+  is_permanent?: boolean;
+};
+
+type SourceItem = {
+  id: string;
+  name: string;
+  is_permanent?: boolean;
+};
+
 export const Application = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const [showInput, setShowInput] = useState(false);
-  const handleShowInput = () => setShowInput(!showInput);
+  // Состояния для данных
+  const [applicants, setApplicants] = useState<ApplicantItem[]>([]);
+  const [sources, setSources] = useState<SourceItem[]>([]);
+  const [loadingData, setLoadingData] = useState({
+    applicants: true,
+    sources: true,
+  });
+  const [dataError, setDataError] = useState<string | null>(null);
 
   const {
     loading,
-    submitError,
     submitSuccess,
     formData,
     handleInputChange,
@@ -60,11 +80,43 @@ export const Application = () => {
     handleClear,
   } = useHandleSubmit(initialFormData);
 
-  // ⭐ Ошибки валидации
   const [errors, setErrors] = useState<ValidationErrors>({});
 
-  // ----------------- ВАЛИДАЦИЯ -----------------
+  // Загрузка статических данных из конфига
+  useEffect(() => {
+    console.log("Использование статических данных из config");
 
+    // Преобразуем статические данные в нужный формат
+    const formattedApplicants = ApplicantOptions.map((option) => ({
+      id: option.value,
+      name: option.label,
+      is_permanent: true,
+    }));
+
+    const formattedSources = SourceOptions.map((option) => ({
+      id: option.value,
+      name: option.label,
+      is_permanent: true,
+    }));
+
+    setApplicants(formattedApplicants);
+    setSources(formattedSources);
+    setLoadingData({ applicants: false, sources: false });
+    setDataError(null);
+  }, []);
+
+  // Преобразование данных в формат для Select
+  const applicantOptions = applicants.map((applicant) => ({
+    label: applicant.name || "Без названия",
+    value: applicant.id,
+  }));
+
+  const sourceOptions = sources.map((source) => ({
+    label: source.name || "Без названия",
+    value: source.id,
+  }));
+
+  // ----------------- ВАЛИДАЦИЯ -----------------
   const validateField = (field: string, value: any) => {
     switch (field) {
       case "address":
@@ -98,15 +150,12 @@ export const Application = () => {
     };
 
     setErrors(newErrors);
-
-    // Если есть хотя бы одна ошибка → return false
     return Object.values(newErrors).every((error) => error === "");
   };
 
   // ----------------- ПОДТВЕРЖДЕНИЕ -----------------
-
   const handleSubmitClick = () => {
-    if (!validateForm()) return; // ❌ Не показываем модалку
+    if (!validateForm()) return;
     setShowConfirmation(true);
   };
 
@@ -115,14 +164,43 @@ export const Application = () => {
     setShowConfirmation(false);
   };
 
+  // Проверяем, загружены ли данные
+  const isDataLoaded = !loadingData.applicants && !loadingData.sources;
+  const hasApplicants = applicantOptions.length > 0;
+  const hasSources = sourceOptions.length > 0;
+
   return (
     <div className="sm:h-screen h-full mt-20 sm:mt-0 flex justify-center w-full sm:items-center px-4">
       <div className="w-[1050px] mx-auto p-6 border-1 border-gray-300 rounded-xl bg-white">
-        {/* Сообщения */}
-        {submitError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <div className="text-red-800 font-medium">Ошибка отправки</div>
-            <div className="text-red-600 mt-1">{submitError}</div>
+        {/* Сообщения об ошибках загрузки */}
+        {dataError && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="text-yellow-800 font-medium">Внимание</div>
+              <div className="text-yellow-600 mt-1">{dataError}</div>
+              <div className="text-yellow-600 text-sm mt-1">
+                Проверьте консоль для подробностей
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isDataLoaded && !dataError && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+            <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+            <div className="text-blue-800">Загрузка данных...</div>
+          </div>
+        )}
+
+        {isDataLoaded && (!hasApplicants || !hasSources) && !dataError && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="text-yellow-800 font-medium">Данные не найдены</div>
+            <div className="text-yellow-600 mt-1">
+              {!hasApplicants && "Список заявителей пуст"}
+              {!hasApplicants && !hasSources && ", "}
+              {!hasSources && "Список источников пуст"}
+            </div>
           </div>
         )}
 
@@ -203,7 +281,7 @@ export const Application = () => {
                   behavior: validateField("behavior", v),
                 });
               }}
-              disabled={loading}
+              disabled={loading || !isDataLoaded}
             />
             {errors.behavior && (
               <p className="text-red-500 text-sm">{errors.behavior}</p>
@@ -223,7 +301,7 @@ export const Application = () => {
                 handleSelectChange("urgency")(v);
                 setErrors({ ...errors, urgency: validateField("urgency", v) });
               }}
-              disabled={loading}
+              disabled={loading || !isDataLoaded}
             />
             {errors.urgency && (
               <p className="text-red-500 text-sm">{errors.urgency}</p>
@@ -239,78 +317,68 @@ export const Application = () => {
             <Label>
               <UserRound className="h-5 w-5" /> Заявитель
             </Label>
-            <Select
-              placeholder="Выберите заявителя"
-              items={ApplicantOptions}
-              value={formData.applicant.id}
-              onValueChange={(v) => {
-                handleSelectChange("applicant")(v);
-                setErrors({
-                  ...errors,
-                  applicant: validateField("applicant", { id: v }),
-                });
-              }}
-              disabled={loading}
-            />
+            <div className="relative">
+              <Select
+                placeholder={
+                  loadingData.applicants
+                    ? "Загрузка..."
+                    : hasApplicants
+                      ? "Выберите заявителя"
+                      : "Нет данных"
+                }
+                items={applicantOptions}
+                value={formData.applicant.id}
+                onValueChange={(v) => {
+                  handleSelectChange("applicant")(v);
+                  setErrors({
+                    ...errors,
+                    applicant: validateField("applicant", { id: v }),
+                  });
+                }}
+                disabled={loading || loadingData.applicants || !hasApplicants}
+              />
+              {loadingData.applicants && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                </div>
+              )}
+            </div>
             {errors.applicant && (
               <p className="text-red-500 text-sm">{errors.applicant}</p>
             )}
 
-            <div className="flex gap-1 flex-col">
-              <Label>
-                <FileUser className="h-5 w-5" /> Сведения о заявителе
-              </Label>
-
-              <button
-                onClick={handleShowInput}
-                className="text-xs text-start text-blue-500 hover:underline cursor-pointer"
-              >
-                {showInput ? "Выбрать из списка" : "Ввести свои сведения"}
-              </button>
-
-              {/* --- Если пользователь хочет вводить свои сведения --- */}
-              {showInput ? (
-                <>
-                  <InputWithLabel
-                    label=""
-                    id="custom_source"
-                    type="text"
-                    placeholder="Введите сведения о заявителе"
-                    value={formData.source.id}
-                    onChange={(e) => {
-                      handleSelectChange("source")(e.target.value);
-                      setErrors({
-                        ...errors,
-                        source: validateField("source", { id: e.target.value }),
-                      });
-                    }}
-                  />
-                  {errors.source && (
-                    <p className="text-red-500 text-sm">{errors.source}</p>
-                  )}
-                </>
-              ) : (
-                <>
-                  {/* --- Если выбирает из списка --- */}
-                  <Select
-                    placeholder="Выберите сведения о заявителе"
-                    items={SourceOptions}
-                    value={formData.source.id}
-                    onValueChange={(v) => {
-                      handleSelectChange("source")(v);
-                      setErrors({
-                        ...errors,
-                        source: validateField("source", { id: v }),
-                      });
-                    }}
-                    disabled={loading}
-                  />
-                  {errors.source && (
-                    <p className="text-red-500 text-sm">{errors.source}</p>
-                  )}
-                </>
+            <Label>
+              <FileUser className="h-5 w-5" /> Сведения о заявителе
+            </Label>
+            <div className="relative">
+              <Select
+                placeholder={
+                  loadingData.sources
+                    ? "Загрузка..."
+                    : hasSources
+                      ? "Выберите сведения о заявителе"
+                      : "Нет данных"
+                }
+                items={sourceOptions}
+                value={formData.source.id}
+                onValueChange={(v) => {
+                  handleSelectChange("source")(v);
+                  setErrors({
+                    ...errors,
+                    source: validateField("source", { id: v }),
+                  });
+                }}
+                disabled={loading || loadingData.sources || !hasSources}
+              />
+              {loadingData.sources && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                </div>
               )}
             </div>
+            {errors.source && (
+              <p className="text-red-500 text-sm">{errors.source}</p>
+            )}
 
             <InputWithLabel
               icon={<Contact className="h-5 w-5" />}
@@ -326,7 +394,7 @@ export const Application = () => {
                   ...errors,
                   contact_person: validateField(
                     "contact_person",
-                    e.target.value
+                    e.target.value,
                   ),
                 });
               }}
@@ -344,6 +412,7 @@ export const Application = () => {
             color="grey"
             className="flex-1"
             onClick={handleClear}
+            disabled={loading || !isDataLoaded}
           >
             Очистить форму
           </Button>
@@ -353,7 +422,12 @@ export const Application = () => {
             color="default"
             className="flex-1"
             onClick={handleSubmitClick}
-            disabled={loading}
+            disabled={
+              loading ||
+              !isDataLoaded ||
+              !hasApplicants ||
+              !hasSources
+            }
           >
             {loading ? "Отправка..." : "Подать заявку"}
           </Button>

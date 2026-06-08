@@ -1,5 +1,7 @@
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||"http://localhost:8091/api";
+  import.meta.env.VITE_API_URL || "http://localhost:8091/api";
+
+// "http://77.222.46.213:8091/api"
 
 export const ROUTES = {
   HOME: "/",

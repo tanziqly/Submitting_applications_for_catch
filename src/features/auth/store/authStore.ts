@@ -87,7 +87,7 @@ class AuthStore {
 
       console.log('Отправляемые данные:', requestData);
 
-      const response = await api.post<AuthResponse>("/auth/sign-in", requestData);
+      const response = await api.post<AuthResponse>("/auth/login", requestData);
       const data = response.data;
       
       console.log('=== Ответ от сервера ===');

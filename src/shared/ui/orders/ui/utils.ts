@@ -31,7 +31,7 @@ export const transformFilteredData = (filteredRequests: any): TableRowData[] => 
   return requestsArray.map((request, index) => ({
     id: request.id,
     number: request.number || `${index + 1}`,
-    applicant: request.applicant?.name || "Не указан",
+    applicant: request.source?.name || "Не указан",
     urgency: request.urgency || "Не указана",
     date: request.created_at
       ? new Date(request.created_at).toLocaleDateString("ru-RU")
@@ -42,6 +42,7 @@ export const transformFilteredData = (filteredRequests: any): TableRowData[] => 
     applicantName: request.applicant?.name || "Не указано",
     contactPerson: request.contact_person || "Не указано",
     status: request.status || "Не указан",
+    actFile: request.act_file || "",
     source: request.source || { id: "", name: "" },
   }));
 };

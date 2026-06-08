@@ -57,8 +57,8 @@ export const useOrderLogData = () => {
   // Преобразуем данные для таблицы с порядковыми номерами
   const tableData: TableRowData[] = requests.map((request) => ({
     id: request.id,
-    number: request.number, // Простой порядковый номер
-    applicant: request.applicant?.name || "Не указан",
+    number: request.number,
+    applicant: request.source?.name || "Не указан",
     address: request.address || "Не указан",
     dogsCount: request.dogs_count || 0,
     urgency: request.urgency || "Не указана",
@@ -68,6 +68,8 @@ export const useOrderLogData = () => {
       : "Не указана",
     behavior: request.behavior || "Не указано",
     contactPerson: request.contact_person || "Не указано",
+    actFile: request.act_file || "",
+    applicantName: request.applicant?.name || "Не указан",
     source: request.source || { id: "", name: "" },
   }));
 

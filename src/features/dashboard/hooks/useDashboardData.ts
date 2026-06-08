@@ -14,18 +14,12 @@ export interface ChartData {
   value: number;
 }
 
-// Функция для получения ID заявителя из заявки
-const getApplicantId = (request: Request): string => {
+// Функция для получения ID территориального отдела из заявки
+const getTerOtdelId = (request: Request): string => {
   if (!request) return '';
-  
-  if (typeof request.applicant === 'string') {
-    return request.applicant;
-  } else if (request.applicant && typeof request.applicant === 'object') {
-    if ('id' in request.applicant) {
-      return request.applicant.id;
-    } else if ('value' in request.applicant) {
-      return request.applicant;
-    }
+
+  if (request.source && typeof request.source === 'object' && 'id' in request.source) {
+    return request.source.id;
   }
   return '';
 };
@@ -48,10 +42,10 @@ export const useDashboardData = (department?: string) => {
     if (!department) {
       return requests;
     }
-    
+
     return requests.filter(request => {
-      const applicantId = getApplicantId(request);
-      return applicantId === department;
+      const terOtdelId = getTerOtdelId(request);
+      return terOtdelId === department;
     });
   };
 

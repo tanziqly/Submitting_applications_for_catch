@@ -10,51 +10,37 @@ import type {
 export const changeRequestStatus = async (
   request: ChangeStatusRequest
 ): Promise<void> => {
-  const response = await api.post("/requests/change-status", request);
+  const response = await api.put("/requests/status", request);
   return response.data;
 };
 
 // Функция для получения акта НА отлов (документ для работы)
 export const getCatchActDocument = async (
-  requestNumber: string,
-  requestYear: string
+  requestId: string
 ): Promise<string> => {
-  const response = await api.get("/requests/download_request", {
-    params: {
-      number: requestNumber,
-      year: requestYear,
-    },
-    validateStatus: (status) => status < 500,
-  });
+  const response = await api.post(
+    "/generate",
+    { requests_ids: [requestId] },
+    { responseType: "blob" }
+  );
 
-  if (response.status === 200 && response.data.url) {
-    return response.data.url;
-  } else if (response.status === 404) {
-    throw new Error("Документ не найден");
-  } else {
-    throw new Error(`Сервер вернул статус: ${response.status}`);
-  }
+  const blob = new Blob([response.data], {
+    type: response.headers["content-type"] || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  return url;
 };
 
 // Функция для получения готового акта отлова (выполненная работа)
 export const getCompletedActDocument = async (
-  requestNumber: string,
-  requestYear: string
+  filename: string
 ): Promise<string> => {
-  const response = await api.get("/requests/download_act", {
-    params: {
-      number: requestNumber,
-      year: requestYear,
-    },
-    validateStatus: (status) => status < 500,
-  });
+  const response = await api.get(`/requests/act/${filename}`);
 
   if (response.status === 200 && response.data.url) {
     return response.data.url;
-  } else if (response.status === 404) {
-    throw new Error("Документ не найден");
   } else {
-    throw new Error(`Сервер вернул статус: ${response.status}`);
+    throw new Error("Не удалось получить акт отлова");
   }
 };
 
@@ -62,12 +48,10 @@ export const uploadAct = async (
   request: UploadActRequest
 ): Promise<UploadResponse> => {
   const formData = new FormData();
-  formData.append("number", request.number);
-  formData.append("id", request.id);
-  formData.append("status", request.status);
+  formData.append("request_id", request.id);
   formData.append("file", request.file);
 
-  const response = await api.post("/requests/upload-act", formData, {
+  const response = await api.post("/requests/act", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

@@ -14,7 +14,7 @@ import {
   SelectItem,
 } from "@shared/ui/select";
 import { ArrowDownWideNarrow } from "lucide-react";
-import { ApplicantOptions } from "@shared/config/selectOptions";
+import { SourceOptions } from "@shared/config/selectOptions";
 import { api } from "@shared/api/axios";
 
 type FilterKind = "none" | "terotdel" | "year";
@@ -195,7 +195,7 @@ export default function FilterDropdownInline({
                   <SelectValue placeholder="Выберите теротдел" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ApplicantOptions.map((option) => (
+                  {SourceOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>

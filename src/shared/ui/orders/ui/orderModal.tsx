@@ -94,8 +94,8 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
   // Функция для получения акта НА отлов (для работы)
   const handleGetCatchAct = async () => {
-    if (!localData?.number) {
-      setDocumentError("Номер заявки не указан");
+    if (!localData?.id) {
+      setDocumentError("ID заявки не указан");
       return;
     }
 
@@ -103,14 +103,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
     setDocumentError(null);
 
     try {
-      // Извлекаем год из даты заявки
-      const requestYear = localData.date
-        ? new Date(localData.date.split(".").reverse().join("-"))
-            .getFullYear()
-            .toString()
-        : new Date().getFullYear().toString();
-
-      const url = await getCatchActDocument(localData.number, requestYear);
+      const url = await getCatchActDocument(String(localData.id));
       window.open(url, "_blank");
       setTimeout(() => onClose(), 1000);
     } catch (error: any) {
@@ -123,8 +116,8 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
   // Функция для получения готового акта отлова (выполненной работы)
   const handleGetCompletedAct = async () => {
-    if (!localData?.number) {
-      setDocumentError("Номер заявки не указан");
+    if (!localData?.actFile) {
+      setDocumentError("Акт отлова не загружен");
       return;
     }
 
@@ -132,14 +125,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
     setDocumentError(null);
 
     try {
-      // Извлекаем год из даты заявки
-      const requestYear = localData.date
-        ? new Date(localData.date.split(".").reverse().join("-"))
-            .getFullYear()
-            .toString()
-        : new Date().getFullYear().toString();
-
-      const url = await getCompletedActDocument(localData.number, requestYear);
+      const url = await getCompletedActDocument(localData.actFile);
       window.open(url, "_blank");
       setTimeout(() => onClose(), 1000);
     } catch (error: any) {
@@ -233,11 +219,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               </div>
               <div>
                 <b>Заявитель:</b>{" "}
-                {localData.applicantName || localData.applicant}
+                {localData.source?.name || localData.applicantInfo || "-"}
               </div>
               <div>
                 <b>Сведения о заявителе:</b>{" "}
-                {localData.source?.name || localData.applicantInfo || "-"}
+                {localData.applicantName || localData.applicant || "-"}
               </div>
               <div>
                 <b>Контактное лицо:</b> {localData.contactPerson || "-"}

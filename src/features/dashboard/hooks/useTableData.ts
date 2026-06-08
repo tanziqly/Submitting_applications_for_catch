@@ -21,7 +21,7 @@ export const useTableData = (requests: Request[]) => {
   const tableData = requests.slice(0, 5).map((request) => ({
     id: request.id,
     number: request.number,
-    applicant: request.applicant?.name || "Не указан",
+    applicant: request.source?.name || "Не указан",
     urgency: request.urgency || "Не указана",
     date: request.created_at
       ? new Date(request.created_at).toLocaleDateString("ru-RU")
@@ -31,6 +31,8 @@ export const useTableData = (requests: Request[]) => {
     behavior: request.behavior || "Не указано",
     contactPerson: request.contact_person || "Не указано",
     status: request.status || "Не указан",
+    actFile: request.act_file || "",
+    applicantName: request.applicant?.name || "Не указан",
     source: request.source || { id: "", name: "" },
   }));
 

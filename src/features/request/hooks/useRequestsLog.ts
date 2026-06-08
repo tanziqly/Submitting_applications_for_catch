@@ -21,6 +21,7 @@ export interface Request {
   dogs_count: number;
   status: string;
   urgency: string;
+  act_file?: string;
   applicant: Applicant;
   source: Source;
 }

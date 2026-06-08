@@ -9,5 +9,5 @@ export const changeRequestStatus = async ({
   id,
   status,
 }: ChangeStatusRequest): Promise<void> => {
-  await api.post("/requests/change-status", { id, status });
+  await api.put("/requests/status", { id, status });
 };

@@ -183,9 +183,7 @@ export const ApplicationsTable = ({
 
   const handleUploadSuccess = () => {
     console.log("Акт успешно загружен");
-    if (selectedRequestData) {
-      updateStatus(selectedRequestData.id, "Выполнена");
-    }
+    window.location.reload();
   };
 
   const selectedRow = selectedRowId
