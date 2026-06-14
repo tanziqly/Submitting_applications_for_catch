@@ -221,7 +221,7 @@ export const Application = () => {
         <div className="flex flex-col md:flex-row gap-8">
           {/* ЛЕВАЯ КОЛОНКА */}
           <div className="flex-1 flex flex-col gap-4">
-            <h3 className="font-semibold text-sm mb-2">Информация о собаке</h3>
+            <h3 className="font-semibold text-sm mb-2">Информация о безнадзорных животных</h3>
 
             <InputWithLabel
               icon={<MapPin className="h-5 w-5" />}

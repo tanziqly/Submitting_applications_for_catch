@@ -9,10 +9,10 @@ export const Home = () => {
       <div className="max-w-[1440px]">
         {/* Заголовок */}
         <h1 className="text-[35px] font-bold leading-tight text-[#6582A0] md:text-[65px]">
-          Центр приема заявок <br />
-          на отлов{" "}
+          Центр приема заявок
+          на отлов <br />
           <span className="text-[#0239C9] underline">
-            безнадзорных животных.
+            безнадзорных животных
           </span>
         </h1>
 
