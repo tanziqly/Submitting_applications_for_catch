@@ -44,11 +44,13 @@ export const getRequests = async (): Promise<Request[]> => {
     console.log('Полный ответ от API:', response.data);
     
     // Бэкенд возвращает { status: "ok", data: [...] }
+    const sortByNewest = (arr: Request[]) =>
+      [...arr].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
     if (response.data && Array.isArray(response.data.data)) {
-      return response.data.data;
+      return sortByNewest(response.data.data);
     } else if (Array.isArray(response.data)) {
-      // На случай если бэкенд изменится и будет возвращать просто массив
-      return response.data;
+      return sortByNewest(response.data);
     } else {
       console.warn('Неожиданная структура ответа:', response.data);
       return [];

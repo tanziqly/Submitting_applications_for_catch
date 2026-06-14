@@ -76,6 +76,8 @@ export default function FilterDropdownInline({
         );
       }
 
+      filtered = [...filtered].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
       console.log("Отфильтрованные данные:", filtered);
       onFilteredData?.(filtered);
       return data;
