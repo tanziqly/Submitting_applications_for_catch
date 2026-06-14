@@ -61,17 +61,23 @@ export default function FilterDropdownInline({
       onLoading?.(true);
       onError?.(null);
 
-      const params = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => value && value !== "")
-      );
+      console.log("Фильтры:", filters);
 
-      console.log("Фильтры:", params);
-
-      const response = await api.get("/requests", { params });
-      console.log("Отфильтрованные данные:", response.data);
-      
+      const response = await api.get("/requests");
       const data = response.data as Request[];
-      onFilteredData?.(data);
+
+      let filtered = data;
+      if (filters.otdel_id) {
+        filtered = filtered.filter(r => r.source.id === filters.otdel_id);
+      }
+      if (filters.year) {
+        filtered = filtered.filter(r =>
+          new Date(r.created_at).getFullYear().toString() === filters.year
+        );
+      }
+
+      console.log("Отфильтрованные данные:", filtered);
+      onFilteredData?.(filtered);
       return data;
     } catch (error: any) {
       console.error("Ошибка при фильтрации:", error);
